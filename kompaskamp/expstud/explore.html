@@ -1,0 +1,2284 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Program Studi - Kompas Kampus</title>
+    
+    <!-- Dependencies -->
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f3f4f6;
+            background-image: radial-gradient(circle at top right, rgba(79, 70, 229, 0.1), transparent),
+                            radial-gradient(circle at bottom left, rgba(124, 58, 237, 0.1), transparent);
+        }
+
+        .sidebar-nav {
+            width: 280px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .main-content {
+            margin-left: 280px;
+            max-width: calc(100% - 280px);
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 0;
+                max-width: 100%;
+            }
+        }
+
+        .faculty-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--glass-shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .faculty-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .program-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
+            /* Tambahkan padding-top untuk memberi ruang pada badge akreditasi */
+            padding-top: 48px;
+            min-height: 220px; /* Set minimum height for consistency */
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .program-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .accreditation {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: #FEF9C3; /* Light yellow background */
+            color: #854D0E; /* Dark yellow text */
+            z-index: 10;
+            white-space: nowrap; /* Mencegah text wrap */
+            max-width: calc(100% - 32px); /* Maksimal lebar badge */
+            overflow: hidden;
+            text-overflow: ellipsis; /* Menambahkan ellipsis jika teks terlalu panjang */
+        }
+
+        .accreditation-unggul {
+            background: #FEF9C3;
+            color: #854D0E;
+        }
+
+        .accreditation-baik {
+            background: #E0F2F1;
+            color: #00695C;
+        }
+
+        .accreditation-minimum {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .program-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1F2937;
+            /* Hapus padding-right karena sudah ada padding-top di card */
+            margin-bottom: 8px;
+            line-height: 1.5;
+            /* Memastikan teks tidak tumpang tindih */
+            width: 100%;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 3rem; /* Fixed height for title */
+        }
+
+        .program-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #6B7280;
+            font-size: 0.875rem;
+        }
+
+        .program-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 8px;
+            margin-top: auto;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .program-stats {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #4B5563;
+            font-size: 0.75rem;
+        }
+
+        .btn-detail {
+            color: #4F46E5;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .btn-detail:hover {
+            color: #4338CA;
+        }
+
+        .programs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            padding: 16px 0;
+        }
+
+        .faculty-title {
+            font-size: 1.25rem;
+            margin: 24px 0 16px;
+            padding-left: 12px;
+            border-left: 3px solid #4F46E5;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-nav {
+                transform: translateX(-100%);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        .faculty-categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+            min-height: 32px; /* Fixed height for tags container */
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .category-tag {
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px; /* Maximum width for each tag */
+        }
+
+        /* Faculty-specific colors */
+        .fbe-tag { background: #E8F5E9; color: #2E7D32; }
+        .fh-tag { background: #E3F2FD; color: #1565C0; }
+        .fpsb-tag { background: #F3E5F5; color: #7B1FA2; }
+        .fti-tag { background: #FFF3E0; color: #E65100; }
+        .ftsp-tag { background: #E8EAF6; color: #283593; }
+        .fmipa-tag { background: #E0F2F1; color: #00695C; }
+        .fk-tag { background: #FFEBEE; color: #B71C1C; }
+        .fiai-tag { background: #F1F8E9; color: #33691E; }
+
+        .faculty-navigation {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .faculty-nav-item {
+            flex: 1;
+            min-width: 200px;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .faculty-nav-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .faculty-nav-item.active {
+            background: var(--primary-gradient);
+            color: white;
+            border-color: transparent;
+        }
+
+        .faculty-nav-item h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .faculty-nav-item p {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+
+        .faculty-nav-item {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .faculty-nav-item:hover {
+            background: #F3F4F6;
+        }
+
+        .faculty-nav-item.active {
+            background: var(--primary-gradient);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .faculty-section {
+            display: none; /* Hide all sections by default */
+        }
+
+        .faculty-section.active {
+            display: block; /* Show active section */
+        }
+
+        .programs-grid {
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Specific style for FIAI cards to ensure consistency */
+        #fiai .program-card h3 {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+        }
+    </style>
+</head>
+<body x-data="{ sidebarOpen: false }">
+    <!-- Updated Header -->
+    <header class="fixed w-full bg-white shadow-lg z-50">
+        <div class="flex justify-between items-center px-6 py-3">
+            <div class="flex items-center space-x-4">
+                <button @click="sidebarOpen = !sidebarOpen" 
+                        class="p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
+                    <div class="w-6 h-5 flex flex-col justify-between">
+                        <span class="w-full h-0.5 bg-gray-600 rounded-full transition-all duration-200"
+                              :class="{'rotate-45 translate-y-2': sidebarOpen}"></span>
+                        <span class="w-full h-0.5 bg-gray-600 rounded-full transition-all duration-200"
+                              :class="{'opacity-0': sidebarOpen}"></span>
+                        <span class="w-full h-0.5 bg-gray-600 rounded-full transition-all duration-200"
+                              :class="{'-rotate-45 -translate-y-2': sidebarOpen}"></span>
+                    </div>
+                </button>
+                <div class="flex items-center">
+                    <img src="../dashboard/logohet.jpg" alt="Logo" class="h-12 w-auto">
+                    <span class="ml-3 text-xl font-bold">
+                        <span class="text-blue-600">Kompas</span>
+                        <span style="color: #ffff00">Kampus</span>
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center space-x-6">
+                <a href="/kompaskamp/dashboard/home.html" class="text-gray-700 hover:text-blue-600">Home</a>
+                <a href="/kompaskamp/about/about.html" class="text-gray-700 hover:text-blue-600">About Us</a>
+                <a href="/kompaskamp/news/news.html" class="text-gray-700 hover:text-blue-600">News</a>
+            </nav>
+
+            <!-- User Menu -->
+            <div class="flex items-center space-x-4">
+                <div class="relative" x-data="{ isOpen: false }">
+                    <button @click="isOpen = !isOpen" 
+                            class="flex items-center space-x-3 bg-white p-2 rounded-lg hover:bg-gray-50">
+                        <img src="avatar.jpg" alt="Profile" class="w-10 h-10 rounded-full border-2 border-blue-500">
+                        <div class="hidden md:block text-left">
+                            <p id="user-fullname" class="font-semibold text-gray-800"></p>
+                            <p class="text-sm text-gray-500">Student</p>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-400"></i>
+                    </button>
+                    <!-- Changed dropdown implementation -->
+                    <div x-show="isOpen" 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         @click.away="isOpen = false"
+                         class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                        <div class="px-4 py-3 border-b border-gray-100">
+                            <p id="dropdown-fullname" class="font-semibold text-gray-800"></p>
+                            <p id="dropdown-email" class="text-sm text-gray-500"></p>
+                        </div>
+                        <a href="profile.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50">
+                            <i class="fas fa-user-circle text-gray-600"></i>
+                            <span>My Profile</span>
+                        </a>
+                        
+                        
+                        <!-- Update this logout link -->
+                        <a href="../dashboard/php/logout.php" class="flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar - Updated with overlay -->
+    <div class="relative z-40 md:hidden" 
+         x-show="sidebarOpen" 
+         @click.away="sidebarOpen = false">
+        <!-- Overlay -->
+        <div class="fixed inset-0 bg-gray-600 bg-opacity-75" 
+             x-show="sidebarOpen"
+             x-transition:enter="transition-opacity ease-linear duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition-opacity ease-linear duration-300"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"></div>
+
+        <!-- Sidebar -->
+        <aside class="fixed inset-y-0 left-0 max-w-xs w-full bg-white shadow-lg transform transition duration-300 ease-in-out"
+               :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}">
+            <!-- Existing sidebar content -->
+            <nav class="p-4 space-y-2 mt-20">
+                <a href="../dashboard/dash.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="../dashboard/latsol.html" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-book"></i>
+                        <span>Latihan Soal</span>
+                    </div>
+                </a>
+
+                <a href="../dashboard/rekprodi.html" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Rekomendasi Prodi</span>
+                    </div>
+                </a>
+
+                <a href="explore.html" class="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-university"></i>
+                        <span>Info Prodi</span>
+                    </div>
+                    <span class="bg-purple-100 text-purple-600 text-xs px-2 py-1 rounded-full">New</span>
+                </a>
+                
+                <a href="../dashboard/infobeasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Info Beasiswa</span>
+                </a>
+                <a href="../dashboard/feedback.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-comment"></i>
+                    <span>Feedback</span>
+                </a>
+            </nav>
+        </aside>
+    </div>
+
+    <!-- Desktop Sidebar -->
+    <aside class="hidden md:block fixed left-0 top-0 h-full shadow-lg pt-20 bg-white" 
+           :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}">
+        <!-- Existing sidebar content -->
+        <nav class="p-4 space-y-2">
+            <a href="../dashboard/dash.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            
+            <a href="../dashboard/latsol.html" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-book"></i>
+                    <span>Latihan Soal</span>
+                </div>
+            </a>
+
+            <a href="../dashboard/rekprodi.html" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Rekomendasi Prodi</span>
+                </div>
+            </a>
+
+            <a href="explore.html" class="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-university"></i>
+                    <span>Info Prodi</span>
+                </div>
+                <span class="bg-purple-100 text-purple-600 text-xs px-2 py-1 rounded-full">New</span>
+            </a>
+            
+            <a href="../dashboard/infobeasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Info Beasiswa</span>
+            </a>
+            <a href="../dashboard/feedback.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-comment"></i>
+                <span>Feedback</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content pt-24 px-6 pb-8">
+        <!-- Hero Section -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 mb-8 text-white">
+            <h1 class="text-4xl font-bold mb-4">Program Studi UII</h1>
+            <p class="text-xl opacity-90">Temukan 59 program studi unggulan yang akan membawa masa depanmu lebih cerah</p>
+        </div>
+
+        <!-- Search & Filter -->
+        <div class="search-container p-6 mb-8">
+            <div class="relative">
+                <input type="text" id="searchProdi" 
+                       class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                       placeholder="Cari program studi...">
+                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Faculty Tabs -->
+        <div class="faculty-navigation">
+            <button class="faculty-nav-item active" data-faculty="all">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-th-large text-xl"></i>
+                    <div>
+                        <h3>Semua Program</h3>
+                        <p>Lihat semua program studi</p>
+                    </div>
+                </div>
+            </button>
+            <button class="faculty-nav-item" data-faculty="fbe">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-chart-line text-xl"></i>
+                    <div>
+                        <h3>Ekonomi & Bisnis</h3>
+                        <p>11 Program Studi</p>
+                    </div>
+                </div>
+            </button>
+            <button class="faculty-nav-item" data-faculty="fh">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-balance-scale text-xl"></i>
+                    <div>
+                        <h3>Hukum</h3>
+                        <p>5 Program Studi</p>
+                    </div>
+                </div>
+            </button>
+            <button class="faculty-nav-item" data-faculty="fpsb">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-brain text-xl"></i>
+                    <div>
+                        <h3>Psikologi & Sosial Budaya</h3>
+                        <p>6 Program Studi</p>
+                    </div>
+                </div>
+            </button>
+            <button class="faculty-nav-item" data-faculty="fti">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-microchip text-xl"></i>
+                    <div>
+                        <h3>Teknologi Industri</h3>
+                        <p>12 Program Studi</p>
+                    </div>
+                </div>
+            </button>
+            <button class="faculty-nav-item" data-faculty="ftsp">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-building text-xl"></i>
+                    <div>
+                        <h3>Teknik Sipil & Perencanaan</h3>
+                        <p>8 Program Studi</p>
+                    </div>
+                </div>
+            </button>
+            <button class="faculty-nav-item" data-faculty="fmipa">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-atom text-xl"></i>
+                    <div>
+                        <h3>MIPA</h3>
+                        <p>9 Program Studi</p>
+                    </div>
+                </div>
+            </button>
+            <button class="faculty-nav-item" data-faculty="fk">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-user-md text-xl"></i>
+                    <div>
+                        <h3>Kedokteran</h3>
+                        <p>3 Program Studi</p>
+                    </div>
+                </div>
+            </button>
+            <button class="faculty-nav-item" data-faculty="fiai">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-mosque text-xl"></i>
+                    <div>
+                        <h3>Ilmu Agama Islam</h3>
+                        <p>5 Program Studi</p>
+                    </div>
+                </div>
+            </button>
+        </div>
+
+        <!-- Program Grid -->
+        <div class="grid gap-8">
+            <!-- Faculty Sections -->
+            <section class="programs">
+                <!-- Fakultas Bisnis dan Ekonomika -->
+                <div class="faculty-section" id="fbe">
+                    <h2 class="faculty-title">Fakultas Bisnis dan Ekonomika</h2>
+                    <div class="programs-grid">
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fbe-tag">Ekonomi</span>
+                                <span class="category-tag fbe-tag">Bisnis</span>
+                                <span class="category-tag fbe-tag">Keuangan</span>
+                            </div>
+                            <div>
+                                <h3>Akuntansi Perpajakan (S.Tr.Ak)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana Terapan
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">Baik</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fbe-tag">Ekonomi</span>
+                                <span class="category-tag fbe-tag">Bisnis</span>
+                                <span class="category-tag fbe-tag">Keuangan</span>
+                            </div>
+                            <div>
+                                <h3>Analisis Keuangan (S.Tr.E.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana Terapan
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fbe-tag">Ekonomi</span>
+                                <span class="category-tag fbe-tag">Bisnis</span>
+                                <span class="category-tag fbe-tag">Keuangan</span>
+                            </div>
+                            <div>
+                                <h3>Bisnis Digital (S.Tr.Bns.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana Terapan
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; ACCA</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fbe-tag">Ekonomi</span>
+                                <span class="category-tag fbe-tag">Bisnis</span>
+                                <span class="category-tag fbe-tag">Keuangan</span>
+                            </div>
+                            <div>
+                                <h3>Akuntansi (S.Ak.) - IP (Bisnis dan Teknologi)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; ABEST21</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fbe-tag">Ekonomi</span>
+                                <span class="category-tag fbe-tag">Bisnis</span>
+                                <span class="category-tag fbe-tag">Keuangan</span>
+                            </div>
+                            <div>
+                                <h3>Manajemen (S.M.) - IP</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fbe-tag">Ekonomi</span>
+                                <span class="category-tag fbe-tag">Bisnis</span>
+                                <span class="category-tag fbe-tag">Keuangan</span>
+                            </div>
+                            <div>
+                                <h3>Ekonomi Pembangunan (S.E.) - IP</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; ABEST21</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fbe-tag">Ekonomi</span>
+                                <span class="category-tag fbe-tag">Bisnis</span>
+                                <span class="category-tag fbe-tag">Keuangan</span>
+                            </div>
+                            <div>
+                                <h3>Manajemen (M.M.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Magister
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fbe-tag">Ekonomi</span>
+                                <span class="category-tag fbe-tag">Bisnis</span>
+                                <span class="category-tag fbe-tag">Keuangan</span>
+                            </div>
+                            <div>
+                                <h3>Akuntansi (M.Ak.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Magister
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fbe-tag">Ekonomi</span>
+                                <span class="category-tag fbe-tag">Bisnis</span>
+                                <span class="category-tag fbe-tag">Keuangan</span>
+                            </div>
+                            <div>
+                                <h3>Ilmu Ekonomi (M.Ek.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Magister
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">Baik Sekali</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fbe-tag">Ekonomi</span>
+                                <span class="category-tag fbe-tag">Bisnis</span>
+                                <span class="category-tag fbe-tag">Keuangan</span>
+                            </div>
+                            <div>
+                                <h3>Ilmu Ekonomi (Dr.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Doktor
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">Baik Sekali</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fbe-tag">Ekonomi</span>
+                                <span class="category-tag fbe-tag">Bisnis</span>
+                                <span class="category-tag fbe-tag">Keuangan</span>
+                            </div>
+                            <div>
+                                <h3>Manajemen (Dr.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Doktor
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fakultas Hukum -->
+                <div class="faculty-section" id="fh">
+                    <h2 class="faculty-title">Fakultas Hukum</h2>
+                    <div class="programs-grid">
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; FIBAA</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fh-tag">Hukum</span>
+                                <span class="category-tag fh-tag">Bisnis</span>
+                                <span class="category-tag fh-tag">Internasional</span>
+                            </div>
+                            <div>
+                                <h3>Hukum (S.H.) - IP</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">Baik</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fh-tag">Hukum</span>
+                                <span class="category-tag fh-tag">Bisnis</span>
+                                <span class="category-tag fh-tag">Internasional</span>
+                            </div>
+                            <div>
+                                <h3>Hukum Bisnis (S.H.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; FIBAA</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fh-tag">Hukum</span>
+                                <span class="category-tag fh-tag">Bisnis</span>
+                                <span class="category-tag fh-tag">Internasional</span>
+                            </div>
+                            <div>
+                                <h3>Hukum (M.H.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Magister
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; FIBAA</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fh-tag">Hukum</span>
+                                <span class="category-tag fh-tag">Bisnis</span>
+                                <span class="category-tag fh-tag">Internasional</span>
+                            </div>
+                            <div>
+                                <h3>Kenotariatan (M.Kn.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Magister
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; FIBAA</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fh-tag">Hukum</span>
+                                <span class="category-tag fh-tag">Bisnis</span>
+                                <span class="category-tag fh-tag">Internasional</span>
+                            </div>
+                            <div>
+                                <h3>Hukum (Dr.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Doktor
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fakultas Psikologi dan Ilmu Sosial Budaya -->
+                <div class="faculty-section" id="fpsb">
+                    <h2 class="faculty-title">Fakultas Psikologi dan Ilmu Sosial Budaya</h2>
+                    <div class="programs-grid">
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fpsb-tag">Psikologi</span>
+                                <span class="category-tag fpsb-tag">Komunikasi</span>
+                                <span class="category-tag fpsb-tag">Sosial</span>
+                            </div>
+                            <div>
+                                <h3>Psikologi (S.Psi.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fpsb-tag">Psikologi</span>
+                                <span class="category-tag fpsb-tag">Komunikasi</span>
+                                <span class="category-tag fpsb-tag">Sosial</span>
+                            </div>
+                            <div>
+                                <h3>Ilmu Komunikasi (S.I.Kom.) - IP</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">B</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fpsb-tag">Psikologi</span>
+                                <span class="category-tag fpsb-tag">Komunikasi</span>
+                                <span class="category-tag fpsb-tag">Sosial</span>
+                            </div>
+                            <div>
+                                <h3>Hubungan Internasional (S.Hub.Int.) - IP</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fpsb-tag">Psikologi</span>
+                                <span class="category-tag fpsb-tag">Komunikasi</span>
+                                <span class="category-tag fpsb-tag">Sosial</span>
+                            </div>
+                            <div>
+                                <h3>Pendidikan Bahasa Inggris (S.Pd.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">B</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fpsb-tag">Psikologi</span>
+                                <span class="category-tag fpsb-tag">Komunikasi</span>
+                                <span class="category-tag fpsb-tag">Sosial</span>
+                            </div>
+                            <div>
+                                <h3>Psikologi (M.Psi.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Magister
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">B</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fpsb-tag">Psikologi</span>
+                                <span class="category-tag fpsb-tag">Komunikasi</span>
+                                <span class="category-tag fpsb-tag">Sosial</span>
+                            </div>
+                            <div>
+                                <h3>Profesi Psikologi (Psikolog)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Profesi
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fakultas Teknologi Industri -->
+                <div class="faculty-section" id="fti">
+                    <h2 class="faculty-title">Fakultas Teknologi Industri</h2>
+                    <div class="programs-grid">
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fti-tag">Teknik</span>
+                                <span class="category-tag fti-tag">Teknologi</span>
+                                <span class="category-tag fti-tag">Komputer</span>
+                            </div>
+                            <div>
+                                <h3>Teknik Industri (S.T.) - IP</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fti-tag">Teknik</span>
+                                <span class="category-tag fti-tag">Teknologi</span>
+                                <span class="category-tag fti-tag">Komputer</span>
+                            </div>
+                            <div>
+                                <h3>Teknik Kimia (S.T.) - IP</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; IABEE</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fti-tag">Teknik</span>
+                                <span class="category-tag fti-tag">Teknologi</span>
+                                <span class="category-tag fti-tag">Komputer</span>
+                            </div>
+                            <div>
+                                <h3>Teknik Elektro (S.T.) (robotik; biomedik; telekomunikasi; energi) - IP</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fti-tag">Teknik</span>
+                                <span class="category-tag fti-tag">Teknologi</span>
+                                <span class="category-tag fti-tag">Komputer</span>
+                            </div>
+                            <div>
+                                <h3>Informatika (S.Kom.) - IP</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-badges">
+                                <span class="badge badge-ip">International Program</span>
+                                <span class="badge badge-intl">IABEE Accredited</span>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>Jalur IPA</span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-clock"></i>
+                                    <span>4 Tahun</span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-language"></i>
+                                    <span>Bilingual</span>
+                                </div>
+                            </div>
+                            <div class="program-info">
+                                <i class="fas fa-map-marker-alt text-red-500"></i>
+                                <span>Kampus Terpadu UII</span>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">Baik</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fti-tag">Teknik</span>
+                                <span class="category-tag fti-tag">Teknologi</span>
+                                <span class="category-tag fti-tag">Komputer</span>
+                            </div>
+                            <div>
+                                <h3>Informatika - Pendidikan Jarak Jauh(PJJ) (S.Kom.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; IABEE</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fti-tag">Teknik</span>
+                                <span class="category-tag fti-tag">Teknologi</span>
+                                <span class="category-tag fti-tag">Komputer</span>
+                            </div>
+                            <div>
+                                <h3>Teknik Mesin (S.T.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">Baik</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fti-tag">Teknik</span>
+                                <span class="category-tag fti-tag">Teknologi</span>
+                                <span class="category-tag fti-tag">Komputer</span>
+                            </div>
+                            <div>
+                                <h3>Rekayasa Tekstil (S.T.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">Baik</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fti-tag">Teknik</span>
+                                <span class="category-tag fti-tag">Teknologi</span>
+                                <span class="category-tag fti-tag">Komputer</span>
+                            </div>
+                            <div>
+                                <h3>Rekayasa Elektro (M.T.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Magister
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fti-tag">Teknik</span>
+                                <span class="category-tag fti-tag">Teknologi</span>
+                                <span class="category-tag fti-tag">Komputer</span>
+                            </div>
+                            <div>
+                                <h3>Teknik Industri (M.T.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Magister
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-minimum">Minimum</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fti-tag">Teknik</span>
+                                <span class="category-tag fti-tag">Teknologi</span>
+                                <span class="category-tag fti-tag">Komputer</span>
+                            </div>
+                            <div>
+                                <h3>Teknik Kimia (M.T.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Magister
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fti-tag">Teknik</span>
+                                <span class="category-tag fti-tag">Teknologi</span>
+                                <span class="category-tag fti-tag">Komputer</span>
+                            </div>
+                            <div>
+                                <h3>Informatika (M.Kom.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Magister
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">Baik</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fti-tag">Teknik</span>
+                                <span class="category-tag fti-tag">Teknologi</span>
+                                <span class="category-tag fti-tag">Komputer</span>
+                            </div>
+                            <div>
+                                <h3>Rekayasa Industri (Dr.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Doktor
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fakultas Teknik Sipil dan Perencanaan -->
+                <div class="faculty-section" id="ftsp">
+                    <h2 class="faculty-title">Fakultas Teknik Sipil dan Perencanaan</h2>
+                    <div class="programs-grid">
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; IABEE</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag ftsp-tag">Teknik</span>
+                                <span class="category-tag ftsp-tag">Sipil</span>
+                                <span class="category-tag ftsp-tag">Perencanaan</span>
+                            </div>
+                            <div>
+                                <h3>Teknik Sipil (S.T.) - IP</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; KAAB</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag ftsp-tag">Teknik</span>
+                                <span class="category-tag ftsp-tag">Sipil</span>
+                                <span class="category-tag ftsp-tag">Perencanaan</span>
+                            </div>
+                            <div>
+                                <h3>Arsitektur (S.Ars.) - IP</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; IABEE</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag ftsp-tag">Teknik</span>
+                                <span class="category-tag ftsp-tag">Sipil</span>
+                                <span class="category-tag ftsp-tag">Perencanaan</span>
+                            </div>
+                            <div>
+                                <h3>Teknik Lingkungan (S.T.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; KAAB</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag ftsp-tag">Teknik</span>
+                                <span class="category-tag ftsp-tag">Sipil</span>
+                                <span class="category-tag ftsp-tag">Perencanaan</span>
+                            </div>
+                            <div>
+                                <h3>Profesi Arsitek (Ar.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Profesi
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">Baik Sekali</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag ftsp-tag">Teknik</span>
+                                <span class="category-tag ftsp-tag">Sipil</span>
+                                <span class="category-tag ftsp-tag">Perencanaan</span>
+                            </div>
+                            <div>
+                                <h3>Arsitektur (M.Ars.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Magister
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">Baik</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag ftsp-tag">Teknik</span>
+                                <span class="category-tag ftsp-tag">Sipil</span>
+                                <span class="category-tag ftsp-tag">Perencanaan</span>
+                            </div>
+                            <div>
+                                <h3>Teknik Lingkungan (M.T.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Magister
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">B</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag ftsp-tag">Teknik</span>
+                                <span class="category-tag ftsp-tag">Sipil</span>
+                                <span class="category-tag ftsp-tag">Perencanaan</span>
+                            </div>
+                            <div>
+                                <h3>Teknik Sipil (M.T.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Magister
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">B</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag ftsp-tag">Teknik</span>
+                                <span class="category-tag ftsp-tag">Sipil</span>
+                                <span class="category-tag ftsp-tag">Perencanaan</span>
+                            </div>
+                            <div>
+                                <h3>Teknik Sipil (Dr.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Doktor
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fakultas Matematika dan Ilmu Pengetahuan Alam -->
+                <div class="faculty-section" id="fmipa">
+                    <h2 class="faculty-title">Fakultas Matematika dan Ilmu Pengetahuan Alam</h2>
+                    <div class="programs-grid">
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; ASIIN</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fmipa-tag">Matematika</span>
+                                <span class="category-tag fmipa-tag">Ilmu Pengetahuan</span>
+                                <span class="category-tag fmipa-tag">Kimia</span>
+                            </div>
+                            <div>
+                                <h3>Analisis Kimia (A.Md.Si.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Diploma Tiga
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; RSC; ASIIN</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fmipa-tag">Matematika</span>
+                                <span class="category-tag fmipa-tag">Ilmu Pengetahuan</span>
+                                <span class="category-tag fmipa-tag">Kimia</span>
+                            </div>
+                            <div>
+                                <h3>Kimia (S.Si.) - IP</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; ASIIN</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fmipa-tag">Matematika</span>
+                                <span class="category-tag fmipa-tag">Ilmu Pengetahuan</span>
+                                <span class="category-tag fmipa-tag">Kimia</span>
+                            </div>
+                            <div>
+                                <h3>Farmasi (S.Farm.) - IP</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; ASIIN</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fmipa-tag">Matematika</span>
+                                <span class="category-tag fmipa-tag">Ilmu Pengetahuan</span>
+                                <span class="category-tag fmipa-tag">Kimia</span>
+                            </div>
+                            <div>
+                                <h3>Statistika (S.Stat.) - IP</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">Baik Sekali; ASIIN</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fmipa-tag">Matematika</span>
+                                <span class="category-tag fmipa-tag">Ilmu Pengetahuan</span>
+                                <span class="category-tag fmipa-tag">Kimia</span>
+                            </div>
+                            <div>
+                                <h3>Pendidikan Kimia(S.Pd.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fmipa-tag">Matematika</span>
+                                <span class="category-tag fmipa-tag">Ilmu Pengetahuan</span>
+                                <span class="category-tag fmipa-tag">Kimia</span>
+                            </div>
+                            <div>
+                                <h3>Profesi Apoteker (Apt.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Profesi
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; ASIIN; RSC</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fmipa-tag">Matematika</span>
+                                <span class="category-tag fmipa-tag">Ilmu Pengetahuan</span>
+                                <span class="category-tag fmipa-tag">Kimia</span>
+                            </div>
+                            <div>
+                                <h3>Kimia (M.Si.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Magister
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">Baik</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fmipa-tag">Matematika</span>
+                                <span class="category-tag fmipa-tag">Ilmu Pengetahuan</span>
+                                <span class="category-tag fmipa-tag">Kimia</span>
+                            </div>
+                            <div>
+                                <h3>Statistika (M.Stat.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Magister
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fmipa-tag">Matematika</span>
+                                <span class="category-tag fmipa-tag">Ilmu Pengetahuan</span>
+                                <span class="category-tag fmipa-tag">Kimia</span>
+                            </div>
+                            <div>
+                                <h3>Farmasi (M.Farm.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Magister
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fakultas Kedokteran -->
+                <div class="faculty-section" id="fk">
+                    <h2 class="faculty-title">Fakultas Kedokteran</h2>
+                    <div class="programs-grid">
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fk-tag">Kedokteran</span>
+                                <span class="category-tag fk-tag">Kesehatan</span>
+                                <span class="category-tag fk-tag">Medis</span>
+                            </div>
+                            <div>
+                                <h3>Kedokteran (S.Ked.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fk-tag">Kedokteran</span>
+                                <span class="category-tag fk-tag">Kesehatan</span>
+                                <span class="category-tag fk-tag">Medis</span>
+                            </div>
+                            <div>
+                                <h3>Profesi Dokter (dr.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Profesi
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">Baik</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fk-tag">Kedokteran</span>
+                                <span class="category-tag fk-tag">Kesehatan</span>
+                                <span class="category-tag fk-tag">Medis</span>
+                            </div>
+                            <div>
+                                <h3>Kesehatan Masyarakat (M.K.M.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Magister
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fakultas Ilmu Agama Islam -->
+                <div class="faculty-section" id="fiai">
+                    <h2 class="faculty-title">Fakultas Ilmu Agama Islam</h2>
+                    <div class="programs-grid">
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fiai-tag">Agama</span>
+                                <span class="category-tag fiai-tag">Islam</span>
+                                <span class="category-tag fiai-tag">Hukum</span>
+                            </div>
+                            <div>
+                                <h3>Hukum Keluarga (Ahwal Syakhshiyah) (S.H.) - IP</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-unggul">Unggul; AUN-QA</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fiai-tag">Agama</span>
+                                <span class="category-tag fiai-tag">Islam</span>
+                                <span class="category-tag fiai-tag">Hukum</span>
+                            </div>
+                            <div>
+                                <h3>Ekonomi Islam (S.E.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">A; AUN-QA</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fiai-tag">Agama</span>
+                                <span class="category-tag fiai-tag">Islam</span>
+                                <span class="category-tag fiai-tag">Hukum</span>
+                            </div>
+                            <div>
+                                <h3>Pendidikan Agama Islam (S.Pd.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Sarjana
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>IPA/IPS</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">A</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fiai-tag">Agama</span>
+                                <span class="category-tag fiai-tag">Islam</span>
+                                <span class="category-tag fiai-tag">Hukum</span>
+                            </div>
+                            <div>
+                                <h3>Ilmu Agama Islam (Sesuai konsentrasi)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Magister
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="program-card">
+                            <span class="accreditation accreditation-baik">Baik Sekali</span>
+                            <div class="faculty-categories">
+                                <span class="category-tag fiai-tag">Agama</span>
+                                <span class="category-tag fiai-tag">Islam</span>
+                                <span class="category-tag fiai-tag">Hukum</span>
+                            </div>
+                            <div>
+                                <h3>Hukum Islam (Dr.)</h3>
+                                <p class="program-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Doktor
+                                </p>
+                            </div>
+                            <div class="program-stats">
+                                <div class="stat">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn-detail">
+                                <span>Pelajari Program</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white/80 backdrop-blur-md shadow-lg mt-8 py-8 px-8 main-content">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="flex space-x-4 mb-4 md:mb-0">
+                <a href="#" class="text-gray-600 hover:text-blue-600">
+                    <i class="fab fa-instagram text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-blue-600">
+                    <i class="fab fa-twitter text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-blue-600">
+                    <i class="far fa-envelope text-xl"></i>
+                </a>
+            </div>
+            <p class="text-gray-600 text-sm">
+                © 2024 Kompas Kampus. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const facultyNavItems = document.querySelectorAll('.faculty-nav-item');
+            const facultySections = document.querySelectorAll('.faculty-section');
+            const searchInput = document.getElementById('searchProdi');
+
+            // Fungsi untuk menampilkan semua section fakultas
+            function showAllSections() {
+                facultySections.forEach(section => {
+                    section.style.display = 'block';
+                });
+            }
+
+            // Fungsi filter yang diperbaiki
+            function filterByFaculty(facultyId) {
+                if (facultyId === 'all') {
+                    showAllSections();
+                    return;
+                }
+
+                facultySections.forEach(section => {
+                    // Tambahkan console.log untuk debugging
+                    console.log('Checking section:', section.id, 'against faculty:', facultyId);
+                    
+                    if (section.id === facultyId) {
+                        section.style.display = 'block';
+                        // Scroll ke section yang dipilih
+                        section.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        section.style.display = 'none';
+                    }
+                });
+            }
+
+            // Function untuk filter pencarian yang diperbaiki
+            function filterBySearch(searchTerm) {
+                const normalizedTerm = searchTerm.toLowerCase();
+                let hasResults = false;
+
+                // Tampilkan semua section terlebih dahulu
+                showAllSections();
+                
+                document.querySelectorAll('.program-card').forEach(card => {
+                    const title = card.querySelector('h3').textContent.toLowerCase();
+                    const section = card.closest('.faculty-section');
+                    
+                    if (title.includes(normalizedTerm)) {
+                        card.style.display = 'flex';
+                        hasResults = true;
+                        section.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                // Sembunyikan section yang tidak memiliki hasil pencarian
+                facultySections.forEach(section => {
+                    const visibleCards = section.querySelectorAll('.program-card[style="display: flex;"]');
+                    if (visibleCards.length === 0) {
+                        section.style.display = 'none';
+                    }
+                });
+
+                // Jika tidak ada hasil, tampilkan pesan
+                if (!hasResults && searchTerm !== '') {
+                    // Opsional: Tambahkan pesan "tidak ditemukan"
+                    console.log('No results found');
+                }
+            }
+
+            // Event listeners
+            facultyNavItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    facultyNavItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    const facultyId = item.getAttribute('data-faculty');
+                    filterByFaculty(facultyId);
+                    searchInput.value = '';
+                });
+            });
+
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value;
+                if (searchTerm === '') {
+                    const activeFaculty = document.querySelector('.faculty-nav-item.active');
+                    filterByFaculty(activeFaculty.getAttribute('data-faculty'));
+                } else {
+                    filterBySearch(searchTerm);
+                }
+            });
+
+            // Initialize dengan menampilkan semua program
+            showAllSections();
+        });
+        
+        // Function to load user data
+        function loadUserData() {
+            const fullname = sessionStorage.getItem('fullname');
+            const email = sessionStorage.getItem('email');
+            
+            // Update the user fullname in header
+            const userFullnameElement = document.getElementById('user-fullname');
+            if (userFullnameElement && fullname) {
+                userFullnameElement.textContent = fullname;
+            }
+            
+            // Update the dropdown elements
+            const dropdownFullnameElement = document.getElementById('dropdown-fullname');
+            const dropdownEmailElement = document.getElementById('dropdown-email');
+            
+            if (dropdownFullnameElement && fullname) {
+                dropdownFullnameElement.textContent = fullname;
+            }
+            if (dropdownEmailElement && email) {
+                dropdownEmailElement.textContent = email;
+            }
+        }
+
+        // Call the function when page loads
+        document.addEventListener('DOMContentLoaded', loadUserData);
+    
+    </script>
+</body>
+</html>
