@@ -1,0 +1,380 @@
+/* Components */
+.filter-option {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-option:hover {
+    background-color: white;
+  }
+  
+  .counter {
+    margin-left: auto;
+    font-size: 0.875rem;
+    color: rgb(107, 114, 128);
+    background-color: white;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+  }
+  
+  .status-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .status-item:hover {
+    background-color: white;
+  }
+  
+  .status-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+  }
+  
+  .status-label {
+    margin-left: 0.75rem;
+    color: rgb(55, 65, 81);
+  }
+  
+  .tag {
+    padding: 0.25rem 0.75rem;
+    background-color: white;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    color: rgb(75, 85, 99);
+    border: 1px solid rgb(243, 244, 246);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tag:hover {
+    background-color: rgb(238, 242, 255);
+    color: rgb(79, 70, 229);
+  }
+  
+  .feedback-card {
+    background-color: white;
+    border-radius: 0.75rem;
+    border: 1px solid rgb(243, 244, 246);
+    padding: 1.5rem;
+    transition: all 0.2s;
+  }
+  .feedback-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .modern-input {
+    width: 100%;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.75rem;
+    border: 2px solid rgb(229, 231, 235);
+    transition: all 0.2s;
+  }
+  .modern-input:focus {
+    border-color: rgb(129, 140, 248);
+    box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.2);
+    outline: none;
+  }
+  
+  .tag-modern {
+    padding: 0.5rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s;
+  }
+  
+  .animated-icon {
+    transition: transform 0.3s;
+  }
+  
+  /* Regular CSS classes */
+  :root {
+    --primary-blue: #4A90E2;
+    --accent-green: #7ED321;
+    --accent-purple: #8E44AD;
+  }
+  
+  .glassmorphism {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  }
+  
+  .gradient-border {
+    position: relative;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(45deg, #4F46E5, #7C3AED) border-box;
+    border: 2px solid transparent;
+    border-radius: 1rem;
+  }
+  
+  :root {
+    --primary: #4F46E5;
+    --secondary: #7C3AED;
+    --accent: #06B6D4;
+    --background: #f3f4f6;
+    --glass-bg: rgba(255, 255, 255, 0.9);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --text-primary: #1F2937;
+    --text-secondary: #4B5563;
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+  }
+  
+  /* Global Styles */
+  body {
+    background: var(--background);
+    background-image: 
+      radial-gradient(circle at top right, rgba(79, 70, 229, 0.1), transparent),
+      radial-gradient(circle at bottom left, rgba(124, 58, 237, 0.1), transparent);
+    color: var(--text-primary);
+    font-family: 'Poppins', sans-serif;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  /* Sidebar */
+  .sidebar-nav {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border-right: 1px solid var(--glass-border);
+    width: 280px;
+    transform: translateX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  /* Cards */
+  .card-dashboard {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-lg);
+    transition: all 0.3s ease;
+  }
+  
+  .card-dashboard:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease forwards;
+  }
+  
+  /* Progress Bars */
+  .progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    transition: width 1s ease;
+  }
+  
+  /* New Components */
+  .stat-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: center;
+    padding: 1.5rem;
+  }
+  
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+  }
+  
+  /* Chart Styles */
+  .chart-container {
+    background: var(--glass-bg);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-lg);
+    margin: 1rem 0;
+  }
+  
+  .chart-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  
+  .data-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+  }
+  
+  .data-value {
+    font-size: 2rem;
+    font-weight: bold;
+  }
+  
+  /* News Card Styles */
+  .news-card {
+    transition: transform 0.3s ease;
+  }
+  
+  .news-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  /* Timeline Styles */
+  .timeline-item {
+    position: relative;
+  }
+  
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: var(--primary);
+    opacity: 0.2;
+  }
+  
+  /* Achievement Card Styles */
+  .achievement-card {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    transition: transform 0.3s ease;
+  }
+  
+  .achievement-card:hover {
+    transform: translateY(-3px);
+  }
+  
+  /* Admission Paths Styles */
+  .admission-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      transition: all 0.3s ease;
+  }
+  
+  .admission-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+  }
+  
+  .schedule-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      background: var(--glass-bg);
+      margin-bottom: 0.5rem;
+  }
+  
+  .requirement-list li {
+      position: relative;
+      padding-left: 1.5rem;
+  }
+  
+  .requirement-list li::before {
+      content: '•';
+      position: absolute;
+      left: 0.5rem;
+      color: var(--primary);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .sidebar-nav {
+      transform: translateX(-100%);
+    }
+    
+    .main-content {
+      margin-left: 0 !important;
+    }
+  }
+  :root {
+    --primary-gradient: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+    --glass-bg: rgba(255, 255, 255, 0.9);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    background: #f3f4f6;
+    background-image: radial-gradient(circle at top right, rgba(79, 70, 229, 0.1), transparent),
+                    radial-gradient(circle at bottom left, rgba(124, 58, 237, 0.1), transparent);
+}
+
+/* ...existing styles from dash.html... */
+
+/* Add these specific styles for feedback page */
+.sidebar-nav {
+    width: 280px;
+    z-index: 40;
+}
+
+.main-content {
+    margin-left: 280px;
+    min-height: 100vh;
+    padding-top: 80px;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 64px; /* Space for footer */
+}
+
+.feedback-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    flex: 1;
+}
+
+footer {
+    margin-left: 280px !important;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: calc(100% - 280px);
+    z-index: 40;
+    height: 64px;
+    background: transparent; /* Remove background */
+    backdrop-filter: none; /* Remove blur effect */
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .feedback-container {
+        padding: 1rem;
+    }
+
+    footer {
+        margin-left: 0 !important;
+        width: 100%;
+    }
+}

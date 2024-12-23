@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Info Beasiswa - Kompas Kampus</title>
+    
+    <!-- Dependencies -->
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/infobeasiswa.css">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+    <style>
+        
+    </style>
+</head>
+<body x-data="{
+    sidebarOpen: window.innerWidth >= 1024, 
+    selectedFaculty: 'all',
+    selectedType: 'all',
+    searchQuery: '',
+    scholarshipTypes: [
+        { id: 'unggulan', name: 'Beasiswa Unggulan', coverage: 'Full UKT' },
+        { id: 'hafizh', name: 'Hafizh/Hafizhah', coverage: 'Full UKT + Living Cost' },
+        { id: 'dhuafa', name: 'Beasiswa Dhuafa', coverage: 'Full UKT' },
+        { id: 'santri', name: 'Beasiswa Santri', coverage: 'Full/Partial UKT' },
+        { id: 'atletSeni', name: 'Atlet & Seni', coverage: 'Full/Partial UKT' },
+        { id: 'kip', name: 'KIP-Kuliah', coverage: 'Full UKT + Living Cost' }
+    ],
+    scholarships: [
+        // FIAI Scholarships
+        {
+            id: 'fiai1',
+            title: 'Beasiswa Hafizh FIAI',
+            type: 'hafizh',
+            faculty: 'FIAI',
+            status: 'active',
+            deadline: '2024-02-25',
+            coverage: 'Full UKT + Living Cost',
+            requirements: ['Minimal 15 Juz', 'IPK min 3.25'],
+            description: 'Program beasiswa khusus penghafal Al-Quran FIAI'
+        },
+        {
+            id: 'fiai2',
+            title: 'Beasiswa Prestasi FIAI',
+            type: 'unggulan',
+            faculty: 'FIAI',
+            status: 'active',
+            deadline: '2024-03-01',
+            coverage: 'Full UKT',
+            requirements: ['IPK min 3.50', 'Aktif organisasi'],
+            description: 'Beasiswa unggulan mahasiswa FIAI'
+        },
+        {
+            id: 'fiai3',
+            title: 'Beasiswa Santri FIAI',
+            type: 'santri',
+            faculty: 'FIAI',
+            status: 'active',
+            deadline: '2024-03-10',
+            coverage: 'Full UKT',
+            requirements: ['Alumni Pesantren', 'IPK min 3.25'],
+            description: 'Beasiswa khusus alumni pesantren'
+        },
+        {
+            id: 'fiai4',
+            title: 'Beasiswa Dhuafa FIAI',
+            type: 'dhuafa',
+            faculty: 'FIAI',
+            status: 'active',
+            deadline: '2024-03-15',
+            coverage: 'Full UKT',
+            requirements: ['Surat keterangan tidak mampu', 'IPK min 3.00'],
+            description: 'Bantuan biaya kuliah mahasiswa kurang mampu'
+        },
+        {
+            id: 'fiai5',
+            title: 'Beasiswa KIP-K FIAI',
+            type: 'kip',
+            faculty: 'FIAI',
+            status: 'active',
+            deadline: '2024-02-28',
+            coverage: 'Full UKT + Living Cost',
+            requirements: ['Memiliki KIP-K', 'Lulus seleksi'],
+            description: 'Program beasiswa KIP Kuliah FIAI'
+        },
+
+        // FTI Scholarships
+        {
+            id: 'fti1',
+            title: 'Beasiswa Riset FTI',
+            type: 'unggulan',
+            faculty: 'FTI',
+            status: 'active',
+            deadline: '2024-03-15',
+            coverage: 'Full UKT',
+            requirements: ['IPK min 3.40', 'Proposal riset'],
+            description: 'Program beasiswa riset teknologi'
+        },
+        {
+            id: 'fti2',
+            title: 'Beasiswa Atlet FTI',
+            type: 'atletSeni',
+            faculty: 'FTI',
+            status: 'active',
+            deadline: '2024-03-20',
+            coverage: 'Partial UKT',
+            requirements: ['Prestasi olahraga', 'IPK min 3.00'],
+            description: 'Beasiswa atlet berprestasi'
+        },
+        {
+            id: 'fti3',
+            title: 'Beasiswa KIP-K FTI',
+            type: 'kip',
+            faculty: 'FTI',
+            status: 'active',
+            deadline: '2024-02-25',
+            coverage: 'Full UKT + Living Cost',
+            requirements: ['Memiliki KIP-K', 'Lulus seleksi'],
+            description: 'Program beasiswa KIP Kuliah FTI'
+        },
+        {
+            id: 'fti4',
+            title: 'Beasiswa Dhuafa FTI',
+            type: 'dhuafa',
+            faculty: 'FTI',
+            status: 'active',
+            deadline: '2024-03-01',
+            coverage: 'Full UKT',
+            requirements: ['Surat keterangan tidak mampu', 'IPK min 3.00'],
+            description: 'Bantuan biaya kuliah mahasiswa kurang mampu'
+        },
+        {
+            id: 'fti5',
+            title: 'Beasiswa Prestasi FTI',
+            type: 'unggulan',
+            faculty: 'FTI',
+            status: 'active',
+            deadline: '2024-03-10',
+            coverage: 'Full UKT',
+            requirements: ['IPK min 3.50', 'Prestasi akademik'],
+            description: 'Beasiswa mahasiswa berprestasi FTI'
+        },
+
+        // FTSP Scholarships
+        {
+            id: 'ftsp1',
+            title: 'Beasiswa Unggulan FTSP',
+            type: 'unggulan',
+            faculty: 'FTSP',
+            status: 'active',
+            deadline: '2024-03-05',
+            coverage: 'Full UKT',
+            requirements: ['IPK min 3.50', 'Portfolio karya'],
+            description: 'Beasiswa unggulan arsitektur dan teknik'
+        },
+        {
+            id: 'ftsp2',
+            title: 'Beasiswa Seni FTSP',
+            type: 'atletSeni',
+            faculty: 'FTSP',
+            status: 'active',
+            deadline: '2024-03-15',
+            coverage: 'Partial UKT',
+            requirements: ['Prestasi seni', 'Portfolio karya'],
+            description: 'Beasiswa prestasi seni arsitektur'
+        },
+        {
+            id: 'ftsp3',
+            title: 'Beasiswa Santri FTSP',
+            type: 'santri',
+            faculty: 'FTSP',
+            status: 'active',
+            deadline: '2024-03-20',
+            coverage: 'Partial UKT',
+            requirements: ['Alumni pesantren', 'IPK min 3.25'],
+            description: 'Beasiswa khusus alumni pesantren'
+        },
+        {
+            id: 'ftsp4',
+            title: 'Beasiswa KIP-K FTSP',
+            type: 'kip',
+            faculty: 'FTSP',
+            status: 'active',
+            deadline: '2024-02-28',
+            coverage: 'Full UKT + Living Cost',
+            requirements: ['Memiliki KIP-K', 'Lulus seleksi'],
+            description: 'Program beasiswa KIP Kuliah FTSP'
+        },
+        {
+            id: 'ftsp5',
+            title: 'Beasiswa Dhuafa FTSP',
+            type: 'dhuafa',
+            faculty: 'FTSP',
+            status: 'active',
+            deadline: '2024-03-01',
+            coverage: 'Full UKT',
+            requirements: ['Surat keterangan tidak mampu', 'IPK min 3.00'],
+            description: 'Bantuan biaya kuliah mahasiswa kurang mampu'
+        },
+
+        // Add similar structure for other faculties (FMIPA, FE, FH, FPSB, FK)
+        // Each faculty should have 5 scholarships with different types
+        
+        // Sample for FMIPA
+        {
+            id: 'fmipa1',
+            title: 'Beasiswa Riset FMIPA',
+            type: 'unggulan',
+            faculty: 'FMIPA',
+            status: 'active',
+            deadline: '2024-03-10',
+            coverage: 'Full UKT',
+            requirements: ['IPK min 3.50', 'Proposal penelitian'],
+            description: 'Program beasiswa riset sains'
+        },
+        // FMIPA Scholarships (Continued)
+{
+    id: 'fmipa2',
+    title: 'Beasiswa Dhuafa FMIPA',
+    type: 'dhuafa',
+    faculty: 'FMIPA',
+    status: 'active',
+    deadline: '2024-03-15',
+    coverage: 'Full UKT',
+    requirements: ['Surat keterangan tidak mampu', 'IPK min 3.00'],
+    description: 'Bantuan biaya kuliah mahasiswa FMIPA'
+},
+{
+    id: 'fmipa3',
+    title: 'Beasiswa KIP-K FMIPA',
+    type: 'kip',
+    faculty: 'FMIPA',
+    status: 'active',
+    deadline: '2024-02-28',
+    coverage: 'Full UKT + Living Cost',
+    requirements: ['Memiliki KIP-K', 'Lulus seleksi FMIPA'],
+    description: 'Program beasiswa KIP Kuliah FMIPA'
+},
+{
+    id: 'fmipa4',
+    title: 'Beasiswa Santri FMIPA',
+    type: 'santri',
+    faculty: 'FMIPA',
+    status: 'active',
+    deadline: '2024-03-20',
+    coverage: 'Partial UKT',
+    requirements: ['Alumni pesantren', 'IPK min 3.25', 'Aktif di kegiatan keagamaan'],
+    description: 'Beasiswa khusus santri FMIPA'
+},
+{
+    id: 'fmipa5',
+    title: 'Beasiswa Prestasi FMIPA',
+    type: 'unggulan',
+    faculty: 'FMIPA',
+    status: 'active',
+    deadline: '2024-03-25',
+    coverage: 'Full UKT',
+    requirements: ['IPK min 3.50', 'Prestasi akademik', 'Publikasi ilmiah'],
+    description: 'Beasiswa prestasi akademik FMIPA'
+},
+
+// FE (Fakultas Ekonomi) Scholarships
+{
+    id: 'fe1',
+    title: 'Beasiswa Unggulan FE',
+    type: 'unggulan',
+    faculty: 'FE',
+    status: 'active',
+    deadline: '2024-03-05',
+    coverage: 'Full UKT',
+    requirements: ['IPK min 3.50', 'Business plan', 'Prestasi akademik'],
+    description: 'Program beasiswa unggulan Fakultas Ekonomi'
+},
+{
+    id: 'fe2',
+    title: 'Beasiswa KIP-K FE',
+    type: 'kip',
+    faculty: 'FE',
+    status: 'active',
+    deadline: '2024-02-28',
+    coverage: 'Full UKT + Living Cost',
+    requirements: ['Memiliki KIP-K', 'Lulus seleksi FE'],
+    description: 'Program beasiswa KIP Kuliah FE'
+},
+{
+    id: 'fe3',
+    title: 'Beasiswa Hafizh FE',
+    type: 'hafizh',
+    faculty: 'FE',
+    status: 'active',
+    deadline: '2024-03-15',
+    coverage: 'Full UKT + Living Cost',
+    requirements: ['Minimal 15 Juz', 'IPK min 3.25'],
+    description: 'Beasiswa penghafal Quran FE'
+},
+{
+    id: 'fe4',
+    title: 'Beasiswa Dhuafa FE',
+    type: 'dhuafa',
+    faculty: 'FE',
+    status: 'active',
+    deadline: '2024-03-10',
+    coverage: 'Full UKT',
+    requirements: ['Surat keterangan tidak mampu', 'IPK min 3.00'],
+    description: 'Bantuan biaya kuliah mahasiswa FE'
+},
+{
+    id: 'fe5',
+    title: 'Beasiswa Atlet FE',
+    type: 'atletSeni',
+    faculty: 'FE',
+    status: 'active',
+    deadline: '2024-03-20',
+    coverage: 'Partial UKT',
+    requirements: ['Prestasi olahraga', 'IPK min 3.00'],
+    description: 'Beasiswa atlet berprestasi FE'
+},
+
+// FH (Fakultas Hukum) Scholarships
+{
+    id: 'fh1',
+    title: 'Beasiswa Prestasi FH',
+    type: 'unggulan',
+    faculty: 'FH',
+    status: 'active',
+    deadline: '2024-03-10',
+    coverage: 'Full UKT',
+    requirements: ['IPK min 3.50', 'Prestasi kompetisi hukum', 'Aktif organisasi'],
+    description: 'Program beasiswa prestasi Fakultas Hukum'
+},
+{
+    id: 'fh2',
+    title: 'Beasiswa Santri FH',
+    type: 'santri',
+    faculty: 'FH',
+    status: 'active',
+    deadline: '2024-03-15',
+    coverage: 'Partial UKT',
+    requirements: ['Alumni pesantren', 'IPK min 3.25'],
+    description: 'Beasiswa khusus santri FH'
+},
+{
+    id: 'fh3',
+    title: 'Beasiswa KIP-K FH',
+    type: 'kip',
+    faculty: 'FH',
+    status: 'active',
+    deadline: '2024-02-28',
+    coverage: 'Full UKT + Living Cost',
+    requirements: ['Memiliki KIP-K', 'Lulus seleksi FH'],
+    description: 'Program beasiswa KIP Kuliah FH'
+},
+{
+    id: 'fh4',
+    title: 'Beasiswa Dhuafa FH',
+    type: 'dhuafa',
+    faculty: 'FH',
+    status: 'active',
+    deadline: '2024-03-20',
+    coverage: 'Full UKT',
+    requirements: ['Surat keterangan tidak mampu', 'IPK min 3.00'],
+    description: 'Bantuan biaya kuliah mahasiswa FH'
+},
+{
+    id: 'fh5',
+    title: 'Beasiswa Seni Budaya FH',
+    type: 'atletSeni',
+    faculty: 'FH',
+    status: 'active',
+    deadline: '2024-03-25',
+    coverage: 'Partial UKT',
+    requirements: ['Prestasi seni/budaya', 'IPK min 3.00'],
+    description: 'Beasiswa prestasi seni dan budaya FH'
+},
+
+// FPSB Scholarships
+{
+    id: 'fpsb1',
+    title: 'Beasiswa Riset FPSB',
+    type: 'unggulan',
+    faculty: 'FPSB',
+    status: 'active',
+    deadline: '2024-03-15',
+    coverage: 'Full UKT',
+    requirements: ['IPK min 3.50', 'Proposal penelitian', 'Rekomendasi dosen'],
+    description: 'Program beasiswa riset psikologi dan sosial budaya'
+},
+{
+    id: 'fpsb2',
+    title: 'Beasiswa KIP-K FPSB',
+    type: 'kip',
+    faculty: 'FPSB',
+    status: 'active',
+    deadline: '2024-02-28',
+    coverage: 'Full UKT + Living Cost',
+    requirements: ['Memiliki KIP-K', 'Lulus seleksi FPSB'],
+    description: 'Program beasiswa KIP Kuliah FPSB'
+},
+{
+    id: 'fpsb3',
+    title: 'Beasiswa Hafizh FPSB',
+    type: 'hafizh',
+    faculty: 'FPSB',
+    status: 'active',
+    deadline: '2024-03-20',
+    coverage: 'Full UKT + Living Cost',
+    requirements: ['Minimal 15 Juz', 'IPK min 3.25'],
+    description: 'Beasiswa penghafal Quran FPSB'
+},
+{
+    id: 'fpsb4',
+    title: 'Beasiswa Seni FPSB',
+    type: 'atletSeni',
+    faculty: 'FPSB',
+    status: 'active',
+    deadline: '2024-03-25',
+    coverage: 'Partial UKT',
+    requirements: ['Prestasi seni', 'Portfolio karya'],
+    description: 'Beasiswa prestasi seni FPSB'
+},
+{
+    id: 'fpsb5',
+    title: 'Beasiswa Dhuafa FPSB',
+    type: 'dhuafa',
+    faculty: 'FPSB',
+    status: 'active',
+    deadline: '2024-03-10',
+    coverage: 'Full UKT',
+    requirements: ['Surat keterangan tidak mampu', 'IPK min 3.00'],
+    description: 'Bantuan biaya kuliah mahasiswa FPSB'
+},
+
+// FK (Fakultas Kedokteran) Scholarships
+{
+    id: 'fk1',
+    title: 'Beasiswa Unggulan FK',
+    type: 'unggulan',
+    faculty: 'FK',
+    status: 'active',
+    deadline: '2024-03-10',
+    coverage: 'Full UKT',
+    requirements: ['IPK min 3.75', 'Prestasi akademik', 'Rekomendasi dekan'],
+    description: 'Program beasiswa unggulan Fakultas Kedokteran'
+},
+{
+    id: 'fk2',
+    title: 'Beasiswa KIP-K FK',
+    type: 'kip',
+    faculty: 'FK',
+    status: 'active',
+    deadline: '2024-02-28',
+    coverage: 'Full UKT + Living Cost',
+    requirements: ['Memiliki KIP-K', 'Lulus seleksi FK'],
+    description: 'Program beasiswa KIP Kuliah FK'
+},
+{
+    id: 'fk3',
+    title: 'Beasiswa Hafizh FK',
+    type: 'hafizh',
+    faculty: 'FK',
+    status: 'active',
+    deadline: '2024-03-15',
+    coverage: 'Full UKT + Living Cost',
+    requirements: ['Minimal 15 Juz', 'IPK min 3.50'],
+    description: 'Beasiswa penghafal Quran FK'
+},
+{
+    id: 'fk4',
+    title: 'Beasiswa Dhuafa FK',
+    type: 'dhuafa',
+    faculty: 'FK',
+    status: 'active',
+    deadline: '2024-03-20',
+    coverage: 'Full UKT',
+    requirements: ['Surat keterangan tidak mampu', 'IPK min 3.25'],
+    description: 'Bantuan biaya kuliah mahasiswa FK'
+},
+{
+    id: 'fk5',
+    title: 'Beasiswa Prestasi Olahraga FK',
+    type: 'atletSeni',
+    faculty: 'FK',
+    status: 'active',
+    deadline: '2024-03-25',
+    coverage: 'Partial UKT',
+    requirements: ['Prestasi olahraga nasional', 'IPK min 3.25'],
+    description: 'Beasiswa atlet berprestasi FK'
+}
+        // Add 4 more for FMIPA...
+
+        // Continue pattern for remaining faculties...
+    ],
+    filteredScholarships() {
+        let filtered = this.scholarships.filter(scholarship => {
+            const matchesFaculty = this.selectedFaculty === 'all' || scholarship.faculty === this.selectedFaculty;
+            const matchesType = this.selectedType === 'all' || scholarship.type === this.selectedType;
+            const matchesSearch = this.searchQuery.trim() === '' || 
+                                scholarship.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                                scholarship.description.toLowerCase().includes(this.searchQuery.toLowerCase());
+            return matchesFaculty && matchesType && matchesSearch;
+        });
+
+        // Sort filtered results
+        filtered.sort((a, b) => {
+            // First prioritize exact matches with search query
+            if (this.searchQuery.trim() !== '') {
+                const aTitle = a.title.toLowerCase();
+                const bTitle = b.title.toLowerCase();
+                const query = this.searchQuery.toLowerCase();
+                
+                if (aTitle.includes(query) && !bTitle.includes(query)) return -1;
+                if (!aTitle.includes(query) && bTitle.includes(query)) return 1;
+            }
+
+            // Then prioritize matches with selected faculty
+            if (this.selectedFaculty !== 'all') {
+                if (a.faculty === this.selectedFaculty && b.faculty !== this.selectedFaculty) return -1;
+                if (a.faculty !== this.selectedFaculty && b.faculty === this.selectedFaculty) return 1;
+            }
+
+            // Then prioritize matches with selected type
+            if (this.selectedType !== 'all') {
+                if (a.type === this.selectedType && b.type !== this.selectedType) return -1;
+                if (a.type !== this.selectedType && b.type === this.selectedType) return 1;
+            }
+
+            // Finally sort by deadline
+            return new Date(a.deadline) - new Date(b.deadline);
+        });
+
+        return filtered;
+    },
+    savedScholarships: JSON.parse(localStorage.getItem('savedScholarships') || '[]'),
+    showSaved: false,
+    
+    toggleSave(scholarship) {
+        const index = this.savedScholarships.findIndex(s => s.id === scholarship.id);
+        if (index === -1) {
+            this.savedScholarships.push(scholarship);
+        } else {
+            this.savedScholarships.splice(index, 1);
+        }
+        localStorage.setItem('savedScholarships', JSON.stringify(this.savedScholarships));
+    },
+    
+    isScholarshipSaved(id) {
+        return this.savedScholarships.some(s => s.id === id);
+    },
+    emailModal: false,
+    successModal: false,
+    reminderEmail: '',
+    setEmailReminder() {
+        // Here implement actual email reminder functionality
+        this.emailModal = false;
+        this.successModal = true;
+        // Auto close success modal after 5 seconds
+        setTimeout(() => {
+            this.successModal = false;
+        }, 5000);
+    },
+    currentPage: 1,
+    itemsPerPage: 6,
+    
+    paginatedScholarships() {
+        const filtered = this.filteredScholarships();
+        const start = (this.currentPage - 1) * this.itemsPerPage;
+        const end = start + this.itemsPerPage;
+        return filtered.slice(start, end);
+    },
+    
+    totalPages() {
+        return Math.ceil(this.filteredScholarships().length / this.itemsPerPage);
+    },
+    
+    nextPage() {
+        if (this.currentPage < this.totalPages()) {
+            this.currentPage++;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    },
+    
+    prevPage() {
+        if (this.currentPage > 1) {
+            this.currentPage--;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    },
+    faqModal: false,
+    activeTab: 'active', // Add this for tab switching
+    initSidebar() {
+        // Close sidebar on mobile when clicking links
+        const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth < 1024) {
+                    this.sidebarOpen = false;
+                }
+            });
+        });
+
+        // Handle resize events
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) {
+                this.sidebarOpen = true;
+            } else {
+                this.sidebarOpen = false;
+            }
+        });
+    }
+}" class="bg-gray-50">
+    <!-- Header -->
+    <header class="fixed w-full bg-white shadow-lg z-50">
+        <div class="flex justify-between items-center px-6 py-3">
+            <div class="flex items-center space-x-4">
+                <button @click="sidebarOpen = !sidebarOpen; document.body.classList.toggle('overflow-hidden')" 
+                        class="lg:hidden flex flex-col justify-between h-5 p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
+                    <span class="block w-6 h-0.5 bg-gray-600 rounded-full"></span>
+                    <span class="block w-6 h-0.5 bg-gray-600 rounded-full"></span>
+                    <span class="block w-6 h-0.5 bg-gray-600 rounded-full"></span>
+                </button>
+                <div class="flex items-center">
+                    <img src="logohet.jpg" alt="Logo" class="h-12 w-auto">
+                    <span class="ml-3 text-xl font-bold">
+                        <span class="text-blue-600">Kompas</span>
+                        <span style="color: #ffff00">Kampus</span>
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center space-x-6">
+                <a href="/kompaskamp/dashboard/home.html" class="text-gray-700 hover:text-blue-600">Home</a>
+                <a href="/kompaskamp/about/about.html" class="text-gray-700 hover:text-blue-600">About Us</a>
+                <a href="/kompaskamp/news/news.html" class="text-gray-700 hover:text-blue-600">News</a>
+            </nav>
+
+            <!-- User Menu -->
+            <div class="flex items-center space-x-4">
+                <div class="relative" x-data="{ isOpen: false }">
+                    <button @click="isOpen = !isOpen" 
+                            class="flex items-center space-x-3 bg-white p-2 rounded-lg hover:bg-gray-50">
+                        <img src="avatar.jpg" alt="Profile" class="w-10 h-10 rounded-full border-2 border-blue-500">
+                        <div class="hidden md:block text-left">
+                            <p id="user-fullname" class="font-semibold text-gray-800"></p>
+                            <p class="text-sm text-gray-500">Student</p>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-400"></i>
+                    </button>
+                    <!-- Changed dropdown implementation -->
+                    <div x-show="isOpen" 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         @click.away="isOpen = false"
+                         class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                         <div class="px-4 py-3 border-b border-gray-100">
+                             <p id="dropdown-fullname" class="font-semibold text-gray-800"></p>
+                             <p id="dropdown-email" class="text-sm text-gray-500"></p>
+                            </div>
+                            <a href="profile.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50">
+                                <i class="fas fa-user-circle text-gray-600"></i>
+                                <span>My Profile</span>
+                            </a>
+                            
+                            <a href="../dashboard/php/logout.php" class="flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Sidebar -->
+                <div class="sidebar-overlay" 
+                x-show="sidebarOpen" 
+                @click="sidebarOpen = false; document.body.classList.remove('sidebar-active')"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0">
+            </div>
+            
+            <aside class="sidebar-nav fixed left-0 h-full shadow-lg top-[60px]" 
+            :class="{'active': sidebarOpen}">
+            <nav class="p-4 space-y-2">
+                <a href="dash.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                
+                <a href="latsol.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-book"></i>
+                    <span>Latihan Soal</span>
+                </a>
+                
+                <a href="rekprodi.html" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100">
+           <div class="flex items-center space-x-3">
+               <i class="fas fa-chart-pie"></i>
+               <span>Rekomendasi Prodi</span>
+           </div>
+        </a>
+        
+        <a href="/kompaskamp/expstud/explore.html" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-university"></i>
+                <span>Info Prodi</span>
+            </div>
+            <span class="bg-purple-100 text-purple-600 text-xs px-2 py-1 rounded-full">New</span>
+        </a>
+        
+        <a href="infobeasiswa.html" class="flex items-center space-x-3 p-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+            <i class="fas fa-graduation-cap"></i>
+            <span>Info Beasiswa</span>
+        </a>
+        
+        <a href="feedback.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+            <i class="fas fa-comment"></i>
+            <span>Feedback</span>
+       </a>
+   </nav>
+</aside>
+</div>
+</div>
+</div>
+</div>
+</header>
+
+
+
+    <!-- Main Content -->
+    <main class="main-content pt-[60px]">
+        <div class="content-wrapper max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Hero Section -->
+            <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 rounded-2xl overflow-hidden mb-6">
+                <div class="relative px-8 py-12">
+                    <!-- Background Decoration -->
+                    <div class="absolute inset-0 overflow-hidden">
+                        <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-1/3 -translate-y-1/3"></div>
+                        <div class="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full -translate-x-1/3 translate-y-1/3"></div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="relative z-10 max-w-4xl mx-auto">
+                        <div class="text-center mb-12">
+                            <span class="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium mb-4">
+                                🎓 UII Scholarship Center
+                            </span>
+                            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Beasiswa UII</h1>
+                            <p class="text-xl text-white">Program beasiswa khusus mahasiswa Universitas Islam Indonesia</p>
+                        </div>
+
+                        <!-- Simplified Search & Filter Card -->
+                        <div class="bg-white rounded-xl shadow-xl p-6">
+                            <!-- Navigation Tabs - Modified to remove "Akan Datang" -->
+                            <nav class="flex flex-wrap justify-center gap-4 mb-6 border-b border-gray-100 pb-4">
+                                <button @click="activeTab = 'active'" 
+                                        class="bg-indigo-600 text-white px-6 py-2 rounded-full font-medium transition-colors">
+                                    Beasiswa Aktif
+                                </button>
+                            </nav>
+
+                            <!-- Single Search and Filter Row -->
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                <!-- Search Input -->
+                                <div class="md:col-span-6 relative">
+                                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <input type="text" 
+                                           x-model.debounce.300ms="searchQuery"
+                                           placeholder="Cari beasiswa UII..." 
+                                           class="w-full pl-12 pr-4 py-3 rounded-lg border-2 border-gray-100 focus:border-[#002147]">
+                                </div>
+                                 
+                                <!-- Scholarship Type Filter -->
+                                <div class="md:col-span-3">
+                                    <select x-model="selectedType" 
+                                            class="w-full py-3 px-4 rounded-lg border-2 border-gray-100 focus:border-[#002147] focus:ring-2 focus:ring-[#002147]/20">
+                                        <option value="all">Semua Jenis</option>
+                                        <template x-for="type in scholarshipTypes" :key="type.id">
+                                            <option :value="type.id" x-text="type.name"></option>
+                                        </template>
+                                    </select>
+                                </div>
+
+                                <!-- Faculty Filter -->
+                                <div class="md:col-span-3">
+                                    <select x-model="selectedFaculty" 
+                                            class="w-full py-3 px-4 rounded-lg border-2 border-gray-100 focus:border-[#002147] focus:ring-2 focus:ring-[#002147]/20">
+                                        <option value="all">Semua Fakultas</option>
+                                        <option value="FIAI">FIAI</option>
+                                        <option value="FTSP">FTSP</option>
+                                        <option value="FTI">FTI</option>
+                                        <option value="FMIPA">FMIPA</option>
+                                        <option value="FE">FE</option>
+                                        <option value="FH">FH</option>
+                                        <option value="FPSB">FPSB</option>
+                                        <option value="FK">FK</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hasil Filter Section - Muncul di Atas -->
+            <div x-show="searchQuery || selectedFaculty !== 'all' || selectedType !== 'all'" 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 class="mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold">Hasil Pencarian</h2>
+                    <span class="text-gray-600" x-text="filteredScholarships().length + ' beasiswa ditemukan'"></span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <template x-for="scholarship in filteredScholarships()" 
+                              :key="scholarship.id">
+                        <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all">
+                            <!-- Your existing scholarship card template -->
+                            <!-- ... -->
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Default Content Section - Hidden when filter active -->
+            <div x-show="!searchQuery && selectedFaculty === 'all' && selectedType === 'all'">
+                <!-- Enhanced Scholarship Cards -->
+                <!-- Your existing default cards section -->
+                <!-- ... -->
+                
+                <!-- Featured Scholarships -->
+                <!-- Your existing featured scholarships section -->
+                <!-- ... -->
+            </div>
+
+            <!-- Add Bookmark Section before Categories -->
+            <div class="mb-8 bg-white rounded-xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold">Beasiswa Tersimpan</h2>
+                    <button @click="showSaved = !showSaved" 
+                            class="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                        <i class="far fa-bookmark"></i>
+                        <span>Lihat Tersimpan</span>
+                        <span x-show="savedScholarships.length > 0" 
+                              class="ml-2 bg-white text-indigo-600 px-2 py-0.5 rounded-full text-sm"
+                              x-text="savedScholarships.length">
+                        </span>
+                    </button>
+                </div>
+                
+                <!-- Preview of saved scholarships -->
+                <div x-show="savedScholarships.length > 0" class="flex gap-4 overflow-x-auto pb-4">
+                    <template x-for="scholarship in savedScholarships.slice(0, 3)" :key="scholarship.id">
+                        <div class="flex-shrink-0 w-64 bg-gray-50 rounded-lg p-4">
+                            <h3 class="font-medium" x-text="scholarship.title"></h3>
+                            <p class="text-sm text-gray-600 mt-1" x-text="'Deadline: ' + new Date(scholarship.deadline).toLocaleDateString()"></p>
+                        </div>
+                    </template>
+                    <div x-show="savedScholarships.length > 3" 
+                         class="flex-shrink-0 w-64 bg-gray-50 rounded-lg p-4 flex items-center justify-center">
+                        <span class="text-gray-600">+<span x-text="savedScholarships.length - 3"></span> lainnya</span>
+                    </div>
+                </div>
+                
+                <div x-show="savedScholarships.length === 0" class="text-center py-8 text-gray-500">
+                    Belum ada beasiswa yang disimpan
+                </div>
+            </div>
+
+            <!-- Scholarship Categories -->
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                <!-- Beasiswa Unggulan -->
+                <div class="p-4 rounded-xl text-white" style="background:#FFEB00 ">
+                    <i class="fas fa-star text-3xl mb-2"></i>
+                    <h3 class="font-semibold">Beasiswa Unggulan</h3>
+                    <p class="text-sm opacity-80">Full UKT</p>
+                </div>
+                
+                <!-- Beasiswa Hafizh/Hafizhah -->
+                <div class="p-4 rounded-xl text-white" style="background: #006BFF">
+                    <i class="fas fa-quran text-3xl mb-2"></i>
+                    <h3 class="font-semibold">Hafizh/Hafizhah</h3>
+                    <p class="text-sm opacity-80">Full UKT + Living Cost</p>
+                </div>
+                
+                <!-- Beasiswa Dhuafa -->
+                <div class="p-4 rounded-xl" style="background:#FF2929">
+
+                    <i class="fas fa-hands-helping text-3xl mb-2 text-uii-dark-blue"></i>
+                    <h3 class="font-semibold text-uii-dark-blue">Beasiswa Dhuafa</h3>
+                    <p class="text-sm opacity-80 text-uii-dark-blue">Full UKT</p>
+                </div>
+                
+                <!-- Beasiswa Santri -->
+                <div class="p-4 rounded-xl text-white" style="background: var(--uii-sky-blue)">
+                    <i class="fas fa-mosque text-3xl mb-2"></i>
+                    <h3 class="font-semibold">Beasiswa Santri</h3>
+                    <p class="text-sm opacity-80">Full/Partial UKT</p>
+                </div>
+                
+                <!-- Beasiswa Atlet & Seni -->
+                <div class="p-4 rounded-xl text-uii-dark-blue" style="background: #FFA500">
+                    <i class="fas fa-trophy text-3xl mb-2"></i>
+                    <h3 class="font-semibold">Atlet & Seni</h3>
+                    <p class="text-sm opacity-80">Full/Partial UKT</p>
+                </div>
+                
+                <!-- Beasiswa KIP -->
+                <div class="p-4 rounded-xl text-white" style="background: var(--uii-tosca)">
+                    <i class="fas fa-graduation-cap text-3xl mb-2"></i>
+                    <h3 class="font-semibold">KIP-Kuliah</h3>
+                    <p class="text-sm opacity-80">Full UKT + Living Cost</p>
+                </div>
+            </div>
+
+            <!-- Enhanced Scholarship Cards - Only show filtered results -->
+            <div class="space-y-6">
+    <!-- Cards Grid -->
+     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <template x-for="scholarship in paginatedScholarships()" 
+                  :key="scholarship.id">
+            <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all">
+                        <div class="relative">
+                            <img src="../news/source/kampus.png" :alt="scholarship.title" class="w-full h-48 object-cover">
+                            <div class="absolute top-4 left-4 flex space-x-2">
+                                <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm" x-text="scholarship.coverage"></span>
+                                <span x-show="scholarship.faculty !== 'all'" 
+                                      class="bg-purple-500 text-white px-3 py-1 rounded-full text-sm" 
+                                      x-text="scholarship.faculty">
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center gap-3 mb-3">
+                                <img src="uii-logo.png" alt="UII Logo" class="w-10 h-10 rounded-full">
+                                <div>
+                                    <h3 class="font-semibold" x-text="scholarship.title"></h3>
+                                    <p class="text-sm text-gray-600" x-text="scholarship.description"></p>
+                                </div>
+                            </div>
+                            <div class="space-y-3 mb-4">
+                                <div class="flex items-center text-gray-600">
+                                    <i class="fas fa-calendar-alt w-5"></i>
+                                    <span class="ml-2" x-text="'Deadline: ' + new Date(scholarship.deadline).toLocaleDateString()"></span>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <h4 class="font-semibold mb-2">Persyaratan:</h4>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <template x-for="req in scholarship.requirements" :key="req">
+                                        <li x-text="'• ' + req"></li>
+                                    </template>
+                                </ul>
+                            </div>
+                            <div class="flex gap-2">
+                                <a :href="scholarship.type === 'kip' ? 'https://pmb.uii.ac.id/kip/' : 
+              scholarship.type === 'unggulan' ? 'https://kemahasiswaan.uii.ac.id/seleksi-beasiswa-unggulan-uii-untuk-angkatan-2024-tahun-akademik-2024-2025/' :
+              scholarship.type === 'dhuafa' ? 'https://www.uii.ac.id/beasiswa/#toggle-id-2' :
+              scholarship.type === 'santri' ? 'https://kemahasiswaan.uii.ac.id/informasi/beasiswa/#toggle-id-4' :
+              scholarship.type === 'atletSeni' ? 'https://kemahasiswaan.uii.ac.id/informasi/beasiswa/#toggle-id-1' :
+              scholarship.type === 'hafizh' ? 'https://kemahasiswaan.uii.ac.id/beasiswa-hafiz-alquran/' : '#'"
+       target="_blank"
+       class="flex-1 text-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+        Detail
+    </a>
+                                <button @click="toggleSave(scholarship)" 
+                                        class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                                        :class="{ 'text-blue-600': isScholarshipSaved(scholarship.id) }">
+                                    <i :class="isScholarshipSaved(scholarship.id) ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+        </template>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="mt-16 mb-16"> <!-- Increased top and bottom margin -->
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <!-- Two column layout for better organization -->
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+            <!-- Results Counter -->
+            <div class="text-sm text-gray-700 bg-gray-50 px-4 py-2 rounded-lg">
+                Showing
+                <span class="font-medium" x-text="((currentPage - 1) * itemsPerPage) + 1"></span>
+                to
+                <span class="font-medium" x-text="Math.min(currentPage * itemsPerPage, filteredScholarships().length)"></span>
+                of
+                <span class="font-medium" x-text="filteredScholarships().length"></span>
+                results
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="flex items-center justify-center">
+                <nav class="flex items-center gap-2" aria-label="Pagination">
+                    <!-- Previous Button -->
+                    <button @click="prevPage()"
+                            :disabled="currentPage === 1"
+                            :class="{'opacity-50 cursor-not-allowed': currentPage === 1}"
+                            class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-chevron-left mr-1"></i>
+                        Previous
+                    </button>
+
+                    <!-- Centered Page Numbers with max visible pages -->
+                    <div class="flex items-center justify-center gap-2 px-4">
+                        <template x-for="n in Math.min(7, totalPages())" :key="n">
+                            <button @click="currentPage = n"
+                                    class="w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors"
+                                    :class="{
+                                        'bg-indigo-600 text-white': currentPage === n,
+                                        'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50': currentPage !== n
+                                    }">
+                                <span x-text="n"></span>
+                            </button>
+                        </template>
+                        
+                        <!-- Show ellipsis if there are more pages -->
+                        <span x-show="totalPages() > 7" class="text-gray-500">...</span>
+                    </div>
+
+                    <!-- Next Button -->
+                    <button @click="nextPage()"
+                            :disabled="currentPage === totalPages()"
+                            :class="{'opacity-50 cursor-not-allowed': currentPage === totalPages()}"
+                            class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                        Next
+                        <i class="fas fa-chevron-right ml-1"></i>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+            <!-- Loading state / No results message -->
+            <div x-show="filteredScholarships().length === 0" class="text-center py-12">
+                <p class="text-gray-600">Tidak ada beasiswa yang sesuai dengan kriteria pencarian.</p>
+            </div>
+
+    <!-- Timeline Updates - Modified Design -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+  <!-- Deadline Section - Now full width -->
+  <div class="lg:col-span-3 bg-white rounded-xl p-6">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-xl font-bold">Deadline Terdekat</h2>
+        <p class="text-sm text-gray-500 mt-1">Diperbarui: 20 Feb 2024</p>
+      </div>
+      <!-- Modified Reminder Button with Email Modal -->
+      <button @click="emailModal = true" class="text-blue-600 hover:text-blue-700 text-sm">
+        <i class="fas fa-bell mr-1"></i> Set Pengingat
+      </button>
+    </div>
+
+    <!-- Timeline Cards with Visual Indicators -->
+    <div class="space-y-4">
+      <!-- Urgent Deadline -->
+      <div class="relative pl-8 pb-4 border-l-2 border-red-400">
+        <div class="absolute left-[-8px] top-0 w-4 h-4 rounded-full bg-red-500 animate-pulse"></div>
+        <div class="bg-red-50 p-4 rounded-lg border border-red-100 hover:shadow-md transition-all">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center space-x-2">
+              <i class="fas fa-exclamation-circle text-red-500"></i>
+              <span class="text-sm text-red-600 font-medium">25 Februari 2024</span>
+            </div>
+            <span class="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-full">Segera Ditutup</span>
+          </div>
+          <h3 class="font-semibold text-gray-800">Beasiswa KIP-K UII</h3>
+          <div class="flex items-center mt-3">
+            <div class="flex items-center text-sm text-gray-600">
+              <i class="fas fa-info-circle mr-2"></i>
+              <span>Pendaftaran Batch 1</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upcoming Deadline -->
+      <div class="relative pl-8 pb-4 border-l-2 border-yellow-400">
+        <div class="absolute left-[-8px] top-0 w-4 h-4 rounded-full bg-yellow-500"></div>
+        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-100 hover:shadow-md transition-all">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center space-x-2">
+              <i class="fas fa-clock text-yellow-500"></i>
+              <span class="text-sm text-yellow-600 font-medium">1 Maret 2024</span>
+            </div>
+            <span class="text-xs bg-yellow-100 text-yellow-600 px-3 py-1 rounded-full">5 Hari Lagi</span>
+          </div>
+          <h3 class="font-semibold text-gray-800">Beasiswa Prestasi FTSP</h3>
+          <div class="flex items-center mt-3">
+            <div class="flex items-center text-sm text-gray-600">
+              <i class="fas fa-file-alt mr-2"></i>
+              <span>Deadline Pengumpulan Berkas</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Email Reminder Modal -->
+<div x-show="emailModal" 
+     class="fixed inset-0 z-50 overflow-y-auto"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0">
+  <div class="fixed inset-0 bg-black bg-opacity-50" @click="emailModal = false"></div>
+  
+  <div class="relative min-h-screen flex items-center justify-center p-4">
+    <div class="relative bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold">Set Pengingat Email</h3>
+        <button @click="emailModal = false" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <form @submit.prevent="setEmailReminder" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input type="email" 
+                 x-model="reminderEmail" 
+                 required
+                 placeholder="Masukkan email anda"
+                 class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+        </div>
+        
+        <button type="submit" 
+                class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+          Set Pengingat
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add this success modal right after the email reminder modal -->
+<div x-show="successModal" 
+     class="fixed inset-0 z-50 overflow-y-auto"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0 transform scale-90"
+     x-transition:enter-end="opacity-100 transform scale-100"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="opacity-100 transform scale-100"
+     x-transition:leave-end="opacity-0 transform scale-90">
+  
+  <div class="fixed inset-0 bg-black bg-opacity-50" @click="successModal = false"></div>
+  
+  <div class="relative min-h-screen flex items-center justify-center p-4">
+    <div class="relative bg-white rounded-xl shadow-xl max-w-md w-full p-6 overflow-hidden">
+      <!-- Success Animation -->
+      <div class="absolute top-0 left-0 w-full h-1">
+        <div class="h-full bg-green-500 animate-progress"></div>
+      </div>
+      
+      <!-- Content -->
+      <div class="text-center">
+        <div class="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100">
+          <i class="fas fa-check text-3xl text-green-500"></i>
+        </div>
+        
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Pengingat Berhasil Diatur!</h3>
+        <p class="text-gray-600 mb-6">
+          Kami akan mengirimkan notifikasi ke <span class="font-medium" x-text="reminderEmail"></span> untuk:
+        </p>
+        
+        <!-- Reminder Details -->
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+          <div class="flex items-center justify-center space-x-4 text-sm text-gray-600">
+            <div class="flex items-center">
+              <i class="far fa-clock mr-2 text-blue-500"></i>
+              <span>3 hari sebelum deadline</span>
+            </div>
+            <div class="flex items-center">
+              <i class="far fa-bell mr-2 text-blue-500"></i>
+              <span>1 hari sebelum deadline</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Additional Info -->
+        <p class="text-sm text-gray-500 mb-6">
+          Pastikan untuk cek folder spam jika email tidak ditemukan di inbox
+        </p>
+        
+        <!-- Action Buttons -->
+        <div class="flex justify-center"></div>
+          <button @click="successModal = false" 
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            Tutup
+          </button>
+        </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!-- FAQ Section -->
+<div class="bg-white rounded-xl p-6 mb-8">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold">Frequently Asked Questions</h2>
+        <button @click="faqModal = true" class="text-blue-600 hover:text-blue-700 text-sm">Lihat Semua FAQ</button>
+    </div>
+    <div class="space-y-4">
+        <div x-data="{ open: false }" class="border rounded-lg hover:shadow-sm transition-all">
+            <button @click="open = !open" class="w-full p-4 text-left flex justify-between items-center">
+                <span class="font-medium">Apa saja persyaratan umum beasiswa?</span>
+                <i :class="open ? 'fa-chevron-up' : 'fa-chevron-down'" class="fas transition-transform"></i>
+            </button>
+            <div x-show="open" class="p-4 pt-0 text-gray-600 border-t">
+                <ul class="space-y-2">
+                    <li>• Mahasiswa aktif UII</li>
+                    <li>• IPK minimal 3.00</li>
+                    <li>• Tidak sedang menerima beasiswa lain</li>
+                    <li>• Melengkapi berkas administrasi</li>
+                </ul>
+            </div>
+        </div>
+
+        <div x-data="{ open: false }" class="border rounded-lg hover:shadow-sm transition-all">
+            <button @click="open = !open" class="w-full p-4 text-left flex justify-between items-center">
+                <span class="font-medium">Dokumen apa saja yang diperlukan untuk pendaftaran?</span>
+                <i :class="open ? 'fa-chevron-up' : 'fa-chevron-down'" class="fas transition-transform"></i>
+            </button>
+            <div x-show="open" class="p-4 pt-0 text-gray-600 border-t">
+                <ul class="space-y-2">
+                    <li>• Scan KTM dan KTP</li>
+                    <li>• Transkrip nilai terbaru</li>
+                    <li>• Surat pernyataan tidak sedang menerima beasiswa lain</li>
+                    <li>• Surat keterangan aktif kuliah</li>
+                    <li>• Dokumen khusus sesuai jenis beasiswa yang dipilih</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FAQ Modal -->
+<div x-show="faqModal" 
+     class="fixed inset-0 z-50 overflow-y-auto"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0">
+    
+    <div class="fixed inset-0 bg-black bg-opacity-50" @click="faqModal = false"></div>
+    
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="relative bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[80vh] overflow-y-auto p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">FAQ Beasiswa UII</h2>
+                <button @click="faqModal = false" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- FAQ Groups -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-blue-600">Informasi Umum</h3>
+                    
+                    <div x-data="{ open: false }" class="border rounded-lg">
+                        <button @click="open = !open" class="w-full p-4 text-left flex justify-between items-center">
+                            <span class="font-medium">Apa saja jenis beasiswa yang tersedia di UII?</span>
+                            <i :class="open ? 'fa-chevron-up' : 'fa-chevron-down'" class="fas"></i>
+                        </button>
+                        <div x-show="open" class="p-4 pt-0 text-gray-600 border-t">
+                            <ul class="space-y-2">
+                                <li>• Beasiswa Unggulan (Full UKT)</li>
+                                <li>• Beasiswa Hafizh/Hafizhah (Full UKT + Living Cost)</li>
+                                <li>• Beasiswa Dhuafa (Full UKT)</li>
+                                <li>• Beasiswa Santri (Full/Partial UKT)</li>
+                                <li>• Beasiswa Atlet & Seni (Full/Partial UKT)</li>
+                                <li>• KIP-Kuliah (Full UKT + Living Cost)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div x-data="{ open: false }" class="border rounded-lg">
+                        <button @click="open = !open" class="w-full p-4 text-left flex justify-between items-center">
+                            <span class="font-medium">Kapan periode pendaftaran beasiswa?</span>
+                            <i :class="open ? 'fa-chevron-up' : 'fa-chevron-down'" class="fas"></i>
+                        </button>
+                        <div x-show="open" class="p-4 pt-0 text-gray-600 border-t">
+                            <p>Periode pendaftaran beasiswa dibuka dua kali dalam setahun:</p>
+                            <ul class="mt-2 space-y-1">
+                                <li>• Semester Gasal: Juli-Agustus</li>
+                                <li>• Semester Genap: Januari-Februari</li>
+                                <li>• KIP-Kuliah: Menyesuaikan jadwal dari Kemendikbud</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-blue-600">Persyaratan & Pendaftaran</h3>
+
+                    <div x-data="{ open: false }" class="border rounded-lg">
+                        <button @click="open = !open" class="w-full p-4 text-left flex justify-between items-center">
+                            <span class="font-medium">Berapa besar bantuan beasiswa yang diberikan?</span>
+                            <i :class="open ? 'fa-chevron-up' : 'fa-chevron-down'" class="fas"></i>
+                        </button>
+                        <div x-show="open" class="p-4 pt-0 text-gray-600 border-t">
+                            <ul class="space-y-2">
+                                <li>• Full UKT: Beasiswa Unggulan, Dhuafa</li>
+                                <li>• Full UKT + Living Cost: Beasiswa Hafizh, KIP-Kuliah</li>
+                                <li>• Partial UKT (50-75%): Beasiswa Santri, Atlet & Seni</li>
+                                <li>• Bantuan Biaya Hidup: Rp 800.000/bulan</li>
+                                <li>• Bantuan Buku: Rp 500.000/semester</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div x-data="{ open: false }" class="border rounded-lg">
+                        <button @click="open = !open" class="w-full p-4 text-left flex justify-between items-center">
+                            <span class="font-medium">Dokumen apa saja yang diperlukan untuk pendaftaran?</span>
+                            <i :class="open ? 'fa-chevron-up' : 'fa-chevron-down'" class="fas"></i>
+                        </button>
+                        <div x-show="open" class="p-4 pt-0 text-gray-600 border-t">
+                            <ul class="space-y-2">
+                                <li>• Scan KTM dan KTP</li>
+                                <li>• Transkrip nilai terbaru</li>
+                                <li>• Surat pernyataan tidak sedang menerima beasiswa lain</li>
+                                <li>• Surat keterangan aktif kuliah</li>
+                                <li>• Dokumen khusus sesuai jenis beasiswa yang dipilih</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-blue-600">Proses Seleksi</h3>
+                    
+                    <div x-data="{ open: false }" class="border rounded-lg">
+                        <button @click="open = !open" class="w-full p-4 text-left flex justify-between items-center">
+                            <span class="font-medium">Bagaimana proses seleksi beasiswa?</span>
+                            <i :class="open ? 'fa-chevron-up' : 'fa-chevron-down'" class="fas"></i>
+                        </button>
+                        <div x-show="open" class="p-4 pt-0 text-gray-600 border-t">
+                            <ol class="list-decimal list-inside space-y-2">
+                                <li>Seleksi administratif</li>
+                                <li>Verifikasi berkas</li>
+                                <li>Wawancara (untuk beasiswa tertentu)</li>
+                                <li>Pengumuman hasil seleksi</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div x-data="{ open: false }" class="border rounded-lg">
+                        <button @click="open = !open" class="w-full p-4 text-left flex justify-between items-center">
+                            <span class="font-medium">Berapa lama proses seleksi?</span>
+                            <i :class="open ? 'fa-chevron-up' : 'fa-chevron-down'" class="fas"></i>
+                        </button>
+                        <div x-show="open" class="p-4 pt-0 text-gray-600 border-t">
+                            <p>Proses seleksi biasanya memakan waktu:</p>
+                            <ul class="mt-2 space-y-1">
+                                <li>• Seleksi administratif: 1-2 minggu</li>
+                                <li>• Proses wawancara: 1 minggu</li>
+                                <li>• Pengumuman hasil: 1 minggu setelah wawancara</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Footer -->
+<footer class="bg-white/80 backdrop-blur-md shadow-lg py-6">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="flex space-x-6 mb-4 md:mb-0">
+                <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors">
+                    <i class="fab fa-instagram text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors">
+                    <i class="fab fa-twitter text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors">
+                    <i class="far fa-envelope text-xl"></i>
+                </a>
+            </div>
+            <div class="text-center md:text-right">
+                <p class="text-gray-600 text-sm">© 2024 Kompas Kampus. All rights reserved.</p>
+                <p class="text-gray-500 text-xs mt-1">Developed with ❤️ for UII Students</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+            <!-- Initialize AOS -->
+            <script>
+                AOS.init({
+                    duration: 800,
+                    offset: 100,
+                    once: true
+                });
+
+                // Add window resize listener for sidebar
+                window.addEventListener('resize', () => {
+                    if (window.innerWidth >= 1024) {
+                        document.querySelector('[x-data]').__x.$data.sidebarOpen = true;
+                    }
+                });
+
+                // Add scholarship filtering functionality
+                // Add deadline countdown functionality
+                // Add bookmark functionality
+
+                // Tambahkan fungsi untuk scroll ke hasil pencarian
+                function scrollToResults() {
+                    if (searchQuery || selectedFaculty !== 'all' || selectedType !== 'all') {
+                        const resultsSection = document.querySelector('[x-show="searchQuery || selectedFaculty !== \'all\' || selectedType !== \'all\'"]');
+                        if (resultsSection) {
+                            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }
+                }
+
+                // Watch untuk perubahan filter
+                $watch('searchQuery', () => scrollToResults());
+                $watch('selectedFaculty', () => scrollToResults());
+                $watch('selectedType', () => scrollToResults());
+            </script>
+        </div>
+    </main>
+
+    <!-- Add Saved Scholarships Modal -->
+    <div x-show="showSaved" 
+         class="fixed inset-0 z-50 overflow-y-auto"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        
+        <div class="fixed inset-0 bg-black bg-opacity-50" @click="showSaved = false"></div>
+        
+        <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div class="relative bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[80vh] overflow-y-auto p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Beasiswa Tersimpan</h2>
+                    <button @click="showSaved = false" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div x-show="savedScholarships.length === 0" class="text-center py-12 text-gray-500">
+                    Belum ada beasiswa yang disimpan
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <template x-for="scholarship in savedScholarships" :key="scholarship.id">
+                        <div class="bg-white rounded-xl border shadow-sm hover:shadow-md transition-all">
+                            <div class="p-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-semibold" x-text="scholarship.title"></h3>
+                                        <p class="text-sm text-gray-600" x-text="scholarship.description"></p>
+                                    </div>
+                                    <button @click="toggleSave(scholarship)" 
+                                            class="text-red-500 hover:text-red-600">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                                <div class="mt-4 flex justify-between items-center">
+                                    <span class="text-sm text-gray-600" x-text="'Deadline: ' + new Date(scholarship.deadline).toLocaleDateString()"></span>
+                                    <a :href="scholarship.type === 'kip' ? 'https://pmb.uii.ac.id/kip/' : 
+              scholarship.type === 'unggulan' ? 'https://kemahasiswaan.uii.ac.id/seleksi-beasiswa-unggulan-uii-untuk-angkatan-2024-tahun-akademik-2024-2025/' :
+              scholarship.type === 'dhuafa' ? 'https://www.uii.ac.id/beasiswa/#toggle-id-2' :
+              scholarship.type === 'santri' ? 'https://kemahasiswaan.uii.ac.id/informasi/beasiswa/#toggle-id-4' :
+              scholarship.type === 'atletSeni' ? 'https://kemahasiswaan.uii.ac.id/informasi/beasiswa/#toggle-id-1' :
+              scholarship.type === 'hafizh' ? 'https://kemahasiswaan.uii.ac.id/beasiswa-hafiz-alquran/' : '#'"
+       target="_blank"
+       class="text-blue-600 hover:text-blue-700 text-sm">
+        Lihat Detail
+    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Add this script to handle responsive behavior -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle sidebar toggle
+    const toggleSidebar = () => {
+        const sidebar = document.querySelector('.sidebar-nav');
+        const content = document.querySelector('.main-content');
+        
+        if (window.innerWidth < 1024) {
+            sidebar.classList.toggle('active');
+            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        }
+    };
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        const sidebar = document.querySelector('.sidebar-nav');
+        if (window.innerWidth >= 1024) {
+            sidebar.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+
+    // Handle touch events for mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+
+    document.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    });
+
+    const handleSwipe = () => {
+        const sidebar = document.querySelector('.sidebar-nav');
+        const swipeDistance = touchEndX - touchStartX;
+        
+        if (window.innerWidth < 1024) {
+            if (swipeDistance > 50) { // Right swipe
+                sidebar.classList.add('active');
+            } else if (swipeDistance < -50) { // Left swipe
+                sidebar.classList.remove('active');
+            }
+        }
+    };
+});
+        // Function to load user data
+        function loadUserData() {
+            const fullname = sessionStorage.getItem('fullname');
+            const email = sessionStorage.getItem('email');
+            
+            // Update the user fullname in header
+            const userFullnameElement = document.getElementById('user-fullname');
+            if (userFullnameElement && fullname) {
+                userFullnameElement.textContent = fullname;
+            }
+            
+            // Update the dropdown elements
+            const dropdownFullnameElement = document.getElementById('dropdown-fullname');
+            const dropdownEmailElement = document.getElementById('dropdown-email');
+            
+            if (dropdownFullnameElement && fullname) {
+                dropdownFullnameElement.textContent = fullname;
+            }
+            if (dropdownEmailElement && email) {
+                dropdownEmailElement.textContent = email;
+            }
+        }
+
+        // Call the function when page loads
+        document.addEventListener('DOMContentLoaded', loadUserData);
+
+</script>
+
+</body>
+</html> 

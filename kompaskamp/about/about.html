@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Kompas Kampus</title>
+    
+    <!-- Dependencies -->
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background: #f3f4f6;
+            background-image: radial-gradient(circle at top right, rgba(79, 70, 229, 0.1), transparent),
+                            radial-gradient(circle at bottom left, rgba(124, 58, 237, 0.1), transparent);
+        }
+
+        .sidebar-nav {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .main-content {
+            margin-left: 280px;
+        }
+        
+        .card-dashboard {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--glass-shadow);
+            transition: transform 0.3s ease;
+        }
+        
+        .card-dashboard:hover {
+            transform: translateY(-5px);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-nav {
+                transform: translateX(-100%);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Update header styles */
+        header {
+            background: white; /* Solid white background instead of transparent */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .team-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--glass-shadow);
+            transition: transform 0.3s ease;
+        }
+        
+        .team-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .mission-card {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
+            border: 1px solid rgba(79, 70, 229, 0.2);
+        }
+    </style>
+</head>
+<body x-data="{ sidebarOpen: false }">
+    <!-- Header -->
+    <header class="fixed w-full bg-white shadow-lg z-50">
+        <div class="flex justify-between items-center px-6 py-3">
+            <div class="flex items-center space-x-4">
+                <button @click="sidebarOpen = !sidebarOpen" 
+                        class="p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
+                    <div class="w-6 h-5 flex flex-col justify-between">
+                        <span class="w-full h-0.5 bg-gray-600 rounded-full transition-all duration-200"
+                              :class="{'rotate-45 translate-y-2': sidebarOpen}"></span>
+                        <span class="w-full h-0.5 bg-gray-600 rounded-full transition-all duration-200"
+                              :class="{'opacity-0': sidebarOpen}"></span>
+                        <span class="w-full h-0.5 bg-gray-600 rounded-full transition-all duration-200"
+                              :class="{'-rotate-45 -translate-y-2': sidebarOpen}"></span>
+                    </div>
+                </button>
+                <div class="flex items-center">
+                    <img src="/kompaskamp/dashboard/logohet.jpg" alt="Logo" class="h-12 w-auto">
+                    <span class="ml-3 text-xl font-bold">
+                        <span class="text-blue-600">Kompas</span>
+                        <span style="color: #ffff00">Kampus</span>
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center space-x-6">
+                <a href="/kompaskamp/dashboard/home.html" class="text-gray-700 hover:text-blue-600">Home</a>
+                <a href="#" class="text-gray-700 hover:text-blue-600">About Us</a>
+                <a href="/kompaskamp/news/news.html" class="text-gray-700 hover:text-blue-600">News</a>
+            </nav>
+
+            <!-- User Menu -->
+            <div class="flex items-center space-x-4">
+                <div class="relative" x-data="{ isOpen: false }">
+                    <button @click="isOpen = !isOpen" 
+                            class="flex items-center space-x-3 bg-white p-2 rounded-lg hover:bg-gray-50">
+                        <img src="avatar.jpg" alt="Profile" class="w-10 h-10 rounded-full border-2 border-blue-500">
+                        <div class="hidden md:block text-left">
+                            <p id="user-fullname" class="font-semibold text-gray-800"></p>
+                            <p class="text-sm text-gray-500">Student</p>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-400"></i>
+                    </button>
+                    <!-- Changed dropdown implementation -->
+                    <div x-show="isOpen" 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         @click.away="isOpen = false"
+                         class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                        <div class="px-4 py-3 border-b border-gray-100">
+                            <p id="dropdown-fullname" class="font-semibold text-gray-800"></p>
+                            <p id="dropdown-email" class="text-sm text-gray-500"></p>
+                        </div>
+                        <a href="profile.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50">
+                            <i class="fas fa-user-circle text-gray-600"></i>
+                            <span>My Profile</span>
+                        </a>
+                        
+                        <a href="../dashboard/php/logout.php" class="flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar - Updated with overlay -->
+    <div class="relative z-40 md:hidden" 
+         x-show="sidebarOpen" 
+         @click.away="sidebarOpen = false">
+        <!-- Overlay -->
+        <div class="fixed inset-0 bg-gray-600 bg-opacity-75" 
+             x-show="sidebarOpen"
+             x-transition:enter="transition-opacity ease-linear duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition-opacity ease-linear duration-300"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"></div>
+
+        <!-- Sidebar -->
+        <aside class="fixed inset-y-0 left-0 max-w-xs w-full bg-white shadow-lg transform transition duration-300 ease-in-out"
+               :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}">
+            <!-- Existing sidebar content -->
+            <nav class="p-4 space-y-2 mt-20">
+                <a href="/kompaskamp/dashboard/dash.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/kompaskamp/dashboard/latsol.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-book"></i>
+                    <span>Latihan Soal</span>
+                </a>
+                <a href="/kompaskamp/dashboard/rekprodi.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Rekomendasi Prodi</span>
+                </a>
+                <a href="/kompaskamp/expstud/explore.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-university"></i>
+                    <span>Info Prodi</span>
+                </a>
+                <a href="/kompaskamp/dashboard/infobeasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Info Beasiswa</span>
+                </a>
+                <a href="/kompaskamp/dashboard/feedback.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-comment"></i>
+                    <span>Feedback</span>
+                </a>
+            </nav>
+        </aside>
+    </div>
+
+    <!-- Desktop Sidebar -->
+    <aside class="hidden md:block fixed left-0 top-0 h-full shadow-lg pt-20 bg-white" 
+           :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}">
+        <!-- Existing sidebar content -->
+        <nav class="p-4 space-y-2">
+            <a href="/kompaskamp/dashboard/dash.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/kompaskamp/dashboard/latsol.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-book"></i>
+                <span>Latihan Soal</span>
+            </a>
+            <a href="/kompaskamp/dashboard/rekprodi.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-chart-pie"></i>
+                <span>Rekomendasi Prodi</span>
+            </a>
+            <a href="/kompaskamp/expstud/explore.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-university"></i>
+                <span>Info Prodi</span>
+            </a>
+            <a href="/kompaskamp/dashboard/infobeasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Info Beasiswa</span>
+            </a>
+            <a href="/kompaskamp/dashboard/feedback.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-comment"></i>
+                <span>Feedback</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content pt-20 p-6">
+        <!-- Hero Section -->
+        <div class="card-dashboard p-8 mb-8 text-center">
+            <h1 class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 mb-4">
+                Tentang Kompas Kampus
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Membantu calon mahasiswa menemukan jurusan yang tepat melalui pendekatan berbasis data dan nilai-nilai keislaman
+            </p>
+        </div>
+
+        <!-- Vision & Mission -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div class="mission-card rounded-2xl p-8">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="p-3 bg-indigo-100 rounded-full">
+                        <i class="fas fa-eye text-indigo-600 text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">Visi Kami</h2>
+                </div>
+                <p class="text-gray-600 text-lg leading-relaxed">
+                    Menjadi platform terdepan dalam membantu calon mahasiswa Muslim Indonesia menemukan 
+                    jalan pendidikan tinggi yang sesuai dengan potensi dan nilai-nilai keislaman mereka.
+                </p>
+            </div>
+
+            <div class="mission-card rounded-2xl p-8">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="p-3 bg-purple-100 rounded-full">
+                        <i class="fas fa-bullseye text-purple-600 text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">Misi Kami</h2>
+                </div>
+                <ul class="space-y-4 text-gray-600">
+                    <li class="flex items-start space-x-3">
+                        <i class="fas fa-check-circle text-purple-600 mt-1"></i>
+                        <span>Menyediakan alat penilaian akademik yang komprehensif dan akurat</span>
+                    </li>
+                    <li class="flex items-start space-x-3">
+                        <i class="fas fa-check-circle text-purple-600 mt-1"></i>
+                        <span>Mengintegrasikan nilai-nilai keislaman dalam proses pemilihan jurusan</span>
+                    </li>
+                    <li class="flex items-start space-x-3">
+                        <i class="fas fa-check-circle text-purple-600 mt-1"></i>
+                        <span>Memberikan informasi terkini tentang prospek karir dan peluang beasiswa</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Our Values -->
+        <div class="card-dashboard p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Nilai-Nilai Kami</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="p-3 bg-blue-100 rounded-full w-fit mb-4">
+                        <i class="fas fa-balance-scale text-blue-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Integritas</h3>
+                    <p class="text-gray-600">Menjunjung tinggi kejujuran dan transparansi dalam setiap aspek layanan kami</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="p-3 bg-purple-100 rounded-full w-fit mb-4">
+                        <i class="fas fa-hand-holding-heart text-purple-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Empati</h3>
+                    <p class="text-gray-600">Memahami dan peduli terhadap kebutuhan setiap calon mahasiswa</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="p-3 bg-green-100 rounded-full w-fit mb-4">
+                        <i class="fas fa-lightbulb text-green-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Inovasi</h3>
+                    <p class="text-gray-600">Terus mengembangkan solusi terbaik melalui teknologi dan metode terkini</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Our Team -->
+        <div class="card-dashboard p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Tim Kami</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="team-card p-6 rounded-xl text-center">
+                    <img src="team1.jpg" alt="Team Member" class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-indigo-200">
+                    <h3 class="text-lg font-semibold text-gray-800">Muhammad Ali Kasyifana</h3>
+                    <p class="text-gray-600">Project Manager & Backend Engineer</p>
+                    <div class="flex justify-center space-x-3 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-blue-600"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-600"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                <div class="team-card p-6 rounded-xl text-center">
+                    <img src="team1.jpg" alt="Team Member" class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-indigo-200">
+                    <h3 class="text-lg font-semibold text-gray-800">Avit Febriansyah</h3>
+                    <p class="text-gray-600">Frontend Developer & Backend Developer</p>
+                    <div class="flex justify-center space-x-3 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-blue-600"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-600"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                <div class="team-card p-6 rounded-xl text-center">
+                    <img src="team1.jpg" alt="Team Member" class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-indigo-200">
+                    <h3 class="text-lg font-semibold text-gray-800">Iryana Salsabillah</h3>
+                    <p class="text-gray-600">UI/UX Designer</p>
+                    <div class="flex justify-center space-x-3 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-blue-600"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-600"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+
+                <!-- Add more team members with the same structure -->
+            </div>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="card-dashboard p-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Hubungi Kami</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="p-3 bg-blue-100 rounded-full">
+                                <i class="fas fa-envelope text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold">Email</h3>
+                                <p class="text-gray-600">info@kompaskampus.id</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="p-3 bg-green-100 rounded-full">
+                                <i class="fas fa-phone text-green-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold">Telepon</h3>
+                                <p class="text-gray-600">+62 812-3456-7890</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="p-3 bg-purple-100 rounded-full">
+                                <i class="fas fa-map-marker-alt text-purple-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold">Alamat</h3>
+                                <p class="text-gray-600">Yogyakarta, Indonesia</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <form class="space-y-4">
+                    <div>
+                        <label class="block text-gray-700 mb-2">Nama Lengkap</label>
+                        <input type="text" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Email</label>
+                        <input type="email" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Pesan</label>
+                        <textarea rows="4" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg hover:opacity-90 transition-opacity">
+                        Kirim Pesan
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white/80 backdrop-blur-md shadow-lg mt-8 py-8 px-8 main-content">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="flex space-x-4 mb-4 md:mb-0">
+                <a href="#" class="text-gray-600 hover:text-blue-600">
+                    <i class="fab fa-instagram text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-blue-600">
+                    <i class="fab fa-twitter text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-blue-600">
+                    <i class="far fa-envelope text-xl"></i>
+                </a>
+            </div>
+            <p class="text-gray-600 text-sm">
+                © 2024 Kompas Kampus. All rights reserved.
+            </p>
+        </div>
+    </footer>
+    <script>
+        // Function to load user data
+        function loadUserData() {
+                const fullname = sessionStorage.getItem('fullname');
+                const email = sessionStorage.getItem('email');
+                
+                // Update the user fullname in header
+                const userFullnameElement = document.getElementById('user-fullname');
+                if (userFullnameElement && fullname) {
+                    userFullnameElement.textContent = fullname;
+                }
+                
+                // Update the dropdown elements
+                const dropdownFullnameElement = document.getElementById('dropdown-fullname');
+                const dropdownEmailElement = document.getElementById('dropdown-email');
+                
+                if (dropdownFullnameElement && fullname) {
+                    dropdownFullnameElement.textContent = fullname;
+                }
+                if (dropdownEmailElement && email) {
+                    dropdownEmailElement.textContent = email;
+                }
+            }
+    
+            // Call the function when page loads
+            document.addEventListener('DOMContentLoaded', loadUserData);
+    </script>
+</body>
+</html>

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latihan Soal UPCM - Kompas Kampus</title>
+    
+    <!-- Same dependencies as dashboard -->
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/latsol.css">
+    <!-- Same styles as dashboard -->
+    <style>
+        
+    </style>
+</head>
+<body x-data="{ sidebarOpen: false, activeTab: 'regular' }">
+    <!-- Header -->
+    <header class="fixed w-full bg-white shadow-lg z-50">
+        <!-- Copy exact header content from dashboard -->
+        <div class="flex justify-between items-center px-6 py-3">
+            <div class="flex items-center space-x-4">
+                <button @click="sidebarOpen = !sidebarOpen" 
+                        class="p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
+                    <div class="w-6 h-5 flex flex-col justify-between">
+                        <span class="w-full h-0.5 bg-gray-600 rounded-full transition-all duration-200"
+                              :class="{'rotate-45 translate-y-2': sidebarOpen}"></span>
+                        <span class="w-full h-0.5 bg-gray-600 rounded-full transition-all duration-200"
+                              :class="{'opacity-0': sidebarOpen}"></span>
+                        <span class="w-full h-0.5 bg-gray-600 rounded-full transition-all duration-200"
+                              :class="{'-rotate-45 -translate-y-2': sidebarOpen}"></span>
+                    </div>
+                </button>
+                <div class="flex items-center">
+                    <img src="logohet.jpg" alt="Logo" class="h-12 w-auto">
+                    <span class="ml-3 text-xl font-bold">
+                        <span class="text-blue-600">Kompas</span>
+                        <span style="color: #ffff00">Kampus</span>
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center space-x-6">
+                <a href="../dashboard/home.html" class="text-gray-700 hover:text-blue-600">Home</a>
+                <a href="../about/about.html" class="text-gray-700 hover:text-blue-600">About Us</a>
+                <a href="../news/news.html" class="text-gray-700 hover:text-blue-600">News</a>
+            </nav>
+
+            <!-- User Menu -->
+            <div class="flex items-center space-x-4">
+                <div class="relative" x-data="{ isOpen: false }">
+                    <button @click="isOpen = !isOpen" 
+                            class="flex items-center space-x-3 bg-white p-2 rounded-lg hover:bg-gray-50">
+                        <img src="avatar.jpg" alt="Profile" class="w-10 h-10 rounded-full border-2 border-blue-500">
+                        <div class="hidden md:block text-left">
+                            <p id="user-fullname" class="font-semibold text-gray-800"></p>
+                            <p class="text-sm text-gray-500">Student</p>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-400"></i>
+                    </button>
+                    <!-- Changed dropdown implementation -->
+                    <div x-show="isOpen" 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         @click.away="isOpen = false"
+                         class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                        <div class="px-4 py-3 border-b border-gray-100">
+                            <p id="dropdown-fullname" class="font-semibold text-gray-800"></p>
+                            <p id="dropdown-email" class="text-sm text-gray-500"></p>
+                        </div>
+                        <a href="profile.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50">
+                            <i class="fas fa-user-circle text-gray-600"></i>
+                            <span>My Profile</span>
+                        </a>
+                        
+                        <a href="../dashboard/php/logout.php" class="flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar - Updated with overlay -->
+    <div class="relative z-40 md:hidden" 
+         x-show="sidebarOpen" 
+         @click.away="sidebarOpen = false">
+        <!-- Overlay -->
+        <div class="fixed inset-0 bg-gray-600 bg-opacity-75" 
+             x-show="sidebarOpen"
+             x-transition:enter="transition-opacity ease-linear duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition-opacity ease-linear duration-300"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"></div>
+
+        <!-- Sidebar -->
+        <aside class="fixed inset-y-0 left-0 max-w-xs w-full bg-white shadow-lg transform transition duration-300 ease-in-out"
+               :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}">
+            <!-- Existing sidebar content -->
+            <nav class="p-4 space-y-2 mt-20">
+                <a href="dash.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="latsol.html" class="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-book"></i>
+                        <span>Latihan Soal</span>
+                    </div>
+                </a>
+
+                <a href="rekprodi.html" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Rekomendasi Prodi</span>
+                    </div>
+                </a>
+
+                <a href="../expstud/explore.html" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-university"></i>
+                        <span>Info Prodi</span>
+                    </div>
+                    <span class="bg-purple-100 text-purple-600 text-xs px-2 py-1 rounded-full">New</span>
+                </a>
+                
+                <a href="infobeasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Info Beasiswa</span>
+                </a>
+                <a href="feedback.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-comment"></i>
+                    <span>Feedback</span>
+                </a>
+            </nav>
+        </aside>
+    </div>
+
+    <!-- Desktop Sidebar -->
+    <aside class="hidden md:block fixed left-0 top-0 h-full shadow-lg pt-20 bg-white" 
+           :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}">
+        <!-- Existing sidebar content -->
+        <nav class="p-4 space-y-2">
+            <a href="dash.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            
+            <a href="latsol.html" class="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-book"></i>
+                    <span>Latihan Soal</span>
+                </div>
+            </a>
+
+            <a href="rekprodi.html" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Rekomendasi Prodi</span>
+                </div>
+            </a>
+
+            <a href="../expstud/explore.html" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-university"></i>
+                    <span>Info Prodi</span>
+                </div>
+                <span class="bg-purple-100 text-purple-600 text-xs px-2 py-1 rounded-full">New</span>
+            </a>
+            
+            <a href="infobeasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Info Beasiswa</span>
+            </a>
+            <a href="feedback.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-comment"></i>
+                <span>Feedback</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content pt-20 p-6">
+        <!-- Welcome Section -->
+        <div class="card-dashboard p-8 mb-6 rounded-2xl">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+                        Latihan Soal UPCM
+                    </h1>
+                    <p class="text-gray-600 mt-2">Persiapkan dirimu dengan latihan soal sesuai program yang kamu pilih</p>
+                </div>
+                <div class="hidden md:block">
+                    <img src="../news/source/practice.png" alt="Practice Test" class="h-24">
+                </div>
+            </div>
+        </div>
+
+        <!-- Practice Test Section -->
+        <div class="card-dashboard p-6 mb-6" x-data="{ activeProgram: 'regular' }">
+            <!-- Program Selection -->
+            <div class="flex space-x-4 mb-6 overflow-x-auto">
+                <button @click="activeProgram = 'regular'" 
+                        :class="{'bg-blue-600 text-white': activeProgram === 'regular', 'bg-gray-100 text-gray-600': activeProgram !== 'regular'}"
+                        class="px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:bg-blue-500 hover:text-white">
+                    Program Reguler
+                </button>
+                <button @click="activeProgram = 'international'"
+                        :class="{'bg-purple-600 text-white': activeProgram === 'international', 'bg-gray-100 text-gray-600': activeProgram !== 'international'}"
+                        class="px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:bg-purple-500 hover:text-white">
+                    International Program
+                </button>
+                <button @click="activeProgram = 'medical'"
+                        :class="{'bg-green-600 text-white': activeProgram === 'medical', 'bg-gray-100 text-gray-600': activeProgram !== 'medical'}"
+                        class="px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:bg-green-500 hover:text-white">
+                    Program Kedokteran
+                </button>
+            </div>
+
+            <!-- Regular Program Content -->
+            <div x-show="activeProgram === 'regular'" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Pengetahuan Agama Islam -->
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-3 bg-blue-100 rounded-lg">
+                                    <i class="fas fa-book-quran text-blue-600 text-xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-800">Pengetahuan Agama Islam</h3>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-clock mr-2"></i>
+                                <span>25 menit</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-question-circle mr-2"></i>
+                                <span>25 soal</span>
+                            </div>
+                        </div>
+                        <a href="test-page.html" class="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors inline-block text-center">
+                            Mulai Latihan
+                        </a>
+                    </div>
+
+                    <!-- Bahasa Inggris -->
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-3 bg-indigo-100 rounded-lg">
+                                    <i class="fas fa-language text-indigo-600 text-xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-800">Bahasa Inggris</h3>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-clock mr-2"></i>
+                                <span>25 menit</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-question-circle mr-2"></i>
+                                <span>25 soal</span>
+                            </div>
+                        </div>
+                        <a href="test-page-2.html" class="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors inline-block text-center">
+                            Mulai Latihan
+                        </a>
+                    </div>
+
+                    <!-- Logika & Penalaran Analitik -->
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-3 bg-purple-100 rounded-lg">
+                                    <i class="fas fa-brain text-purple-600 text-xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-800">Logika & Penalaran Analitik</h3>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-clock mr-2"></i>
+                                <span>25 menit</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-question-circle mr-2"></i>
+                                <span>25 soal</span>
+                            </div>
+                        </div>
+                        <a href="test-page-3.html" class="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors inline-block text-center">
+                            Mulai Latihan
+                        </a>
+                    </div>
+
+                    <!-- Matematika & Aritmatika -->
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-3 bg-pink-100 rounded-lg">
+                                    <i class="fas fa-square-root-variable text-pink-600 text-xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-800">Matematika & Aritmatika</h3>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-clock mr-2"></i>
+                                <span>25 menit</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-question-circle mr-2"></i>
+                                <span>25 soal</span>
+                            </div>
+                        </div>
+                        <a href="test-page-4.html" class="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors inline-block text-center">
+                            Mulai Latihan
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- International Program Content -->
+            <div x-show="activeProgram === 'international'" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <template x-for="subject in [
+                        {name: 'Pengetahuan Agama Islam', icon: 'fa-book-quran', color: 'blue'},
+                        {name: 'Bahasa Inggris', icon: 'fa-language', color: 'indigo'},
+                        {name: 'Logika & Penalaran Analitik', icon: 'fa-brain', color: 'purple'},
+                        {name: 'Matematika & Aritmatika', icon: 'fa-square-root-variable', color: 'pink'}
+                    ]">
+                        <div class="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div :class="`p-3 bg-${subject.color}-100 rounded-lg`">
+                                        <i :class="`fas ${subject.icon} text-${subject.color}-600 text-xl`"></i>
+                                    </div>
+                                    <h3 class="font-semibold text-gray-800" x-text="subject.name"></h3>
+                                </div>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-clock mr-2"></i>
+                                    <span>25 menit</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-question-circle mr-2"></i>
+                                    <span>25 soal</span>
+                                </div>
+                            </div>
+                            <button class="mt-4 w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors">
+                                Mulai Latihan
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Medical Program Content -->
+            <div x-show="activeProgram === 'medical'" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <template x-for="subject in [
+                        {name: 'Pengetahuan Agama Islam', icon: 'fa-book-quran', color: 'blue'},
+                        {name: 'Bahasa Inggris', icon: 'fa-language', color: 'indigo'},
+                        {name: 'Logika & Penalaran Analitik', icon: 'fa-brain', color: 'purple'},
+                        {name: 'Matematika & Aritmatika', icon: 'fa-square-root-variable', color: 'pink'},
+                        {name: 'Pengetahuan Kedokteran Dasar', icon: 'fa-microscope', color: 'green', note: '(Biologi, Fisika, Kimia & IPA Terpadu)'}
+                    ]">
+                        <div class="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all h-full flex flex-col">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div :class="`p-3 bg-${subject.color}-100 rounded-lg`">
+                                        <i :class="`fas ${subject.icon} text-${subject.color}-600 text-xl`"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800" x-text="subject.name"></h3>
+                                        <p x-if="subject.note" class="text-sm text-gray-500 mt-1" x-text="subject.note"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="space-y-3 mt-auto">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-clock mr-2"></i>
+                                    <span>25 menit</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-question-circle mr-2"></i>
+                                    <span>25 soal</span>
+                                </div>
+                                <button class="mt-4 w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">
+                                    Mulai Latihan
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Instructions -->
+        <div class="card-dashboard p-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Petunjuk Pengerjaan</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-3">
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-info-circle text-blue-500 mt-1"></i>
+                        <span>Setiap komponen terdiri dari 25 soal</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-clock text-blue-500 mt-1"></i>
+                        <span>Waktu pengerjaan 25 menit per komponen</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-check-circle text-blue-500 mt-1"></i>
+                        <span>Hasil akan langsung ditampilkan setelah selesai</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white/80 backdrop-blur-md shadow-lg mt-8 py-6 px-6 main-content">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="flex space-x-4 mb-4 md:mb-0">
+                <a href="#" class="text-gray-600 hover:text-blue-600">
+                    <i class="fab fa-instagram text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-blue-600">
+                    <i class="fab fa-twitter text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-blue-600">
+                    <i class="far fa-envelope text-xl"></i>
+                </a>
+            </div>
+            <p class="text-gray-600 text-sm">
+                © 2024 Kompas Kampus. All rights reserved.
+            </p>
+        </div>
+    </footer>
+    
+    <!-- Add this script before closing body tag -->
+    <script>
+        // Function to load user data
+        function loadUserData() {
+            const fullname = sessionStorage.getItem('fullname');
+            const email = sessionStorage.getItem('email');
+            
+            // Update the user fullname in header
+            const userFullnameElement = document.getElementById('user-fullname');
+            if (userFullnameElement && fullname) {
+                userFullnameElement.textContent = fullname;
+            }
+            
+            // Update the dropdown elements
+            const dropdownFullnameElement = document.getElementById('dropdown-fullname');
+            const dropdownEmailElement = document.getElementById('dropdown-email');
+            
+            if (dropdownFullnameElement && fullname) {
+                dropdownFullnameElement.textContent = fullname;
+            }
+            if (dropdownEmailElement && email) {
+                dropdownEmailElement.textContent = email;
+            }
+        }
+
+        // Call the function when page loads
+        document.addEventListener('DOMContentLoaded', loadUserData);
+    </script>
+</body>
+</html>
