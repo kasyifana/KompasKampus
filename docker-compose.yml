@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    image: kompaskampus
+    container_name: kompaskampus
+    volumes:
+      - .:/var/www/html  
+    ports:
+      - "192.168.238.130:8080:80"
+    restart: always 
+    depends_on:
+      - dbakun
+      - dblatsol
+      - dbtubes
+      - dbkampus
+      - phpmyadmin
+    networks:
+      - app_network
+  
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: dbakun
+      PMA_ROOT: root
+      PMA_ROOT_PASSWORD: akun
+      MYSQL_ROOT_PASSWORD: akun
+    ports:
+      - "192.168.238.130:8081:80"
+    depends_on:
+      - dbakun
+      - dblatsol
+      - dbtubes
+      - dbkampus
+    networks:
+      - app_network
+        
+  dbakun:
+    image: mysql:8.0
+    container_name: mysql_dbakun
+    environment:
+      MYSQL_ROOT_PASSWORD: akun
+      MYSQL_DATABASE: akun
+      MYSQL_USER: akun
+      MYSQL_PASSWORD: akun
+    ports:
+      - "192.168.238.130:3307:3306"  
+    volumes:
+      - dbakun_data:/var/lib/mysql
+    networks:
+      - app_network  
+
+  dblatsol:
+    image: mysql:8.0
+    container_name: mysql_dblatsol
+    environment:
+      MYSQL_ROOT_PASSWORD: latsol
+      MYSQL_DATABASE: latsol
+      MYSQL_USER: latsol
+      MYSQL_PASSWORD: latsol
+    ports:
+      - "192.168.238.130:3308:3306" 
+    volumes:
+      - dblatsol_data:/var/lib/mysql
+    networks:
+      - app_network  
+
+  dbtubes:
+    image: mysql:8.0
+    container_name: mysql_dbtubes
+    environment:
+      MYSQL_ROOT_PASSWORD: tubes
+      MYSQL_DATABASE: tubes
+      MYSQL_USER: tubes
+      MYSQL_PASSWORD: tubes
+    ports:
+      - "192.168.238.130:3309:3306" 
+    volumes:
+      - dbtubes_data:/var/lib/mysql
+    networks:
+      - app_network
+
+  dbkampus:
+    image: mysql:8.0
+    container_name: mysql_dbkampus
+    environment:
+      MYSQL_ROOT_PASSWORD: kampus
+      MYSQL_DATABASE: kampus
+      MYSQL_USER: kampus
+      MYSQL_PASSWORD: kampus
+    ports:
+      - "192.168.238.130:3310:3306" 
+    volumes:
+      - dbkampus_data:/var/lib/mysql
+    networks:
+      - app_network    
+
+volumes:
+  dbakun_data:
+  dblatsol_data:
+  dbtubes_data:
+  dbkampus_data:
+
+networks:
+  app_network:
