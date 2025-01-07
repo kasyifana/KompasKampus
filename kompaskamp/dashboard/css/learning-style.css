@@ -1,0 +1,9 @@
+:root {
+    --primary: #4F46E5;
+    --primary-dark: #4338CA;
+    --secondary: #7C3AED;
+    --bg-gradient: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+}
+
+/* Copy all the styles from minatbakat.html */
+/* Just change the color scheme if desired */

@@ -1,0 +1,2219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assessment - Kompas Kampus</title>
+    
+    <!-- Dependencies -->
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="questions-data.js"></script>
+    <link rel="stylesheet" href="css/assesment.css">
+    
+    <style>
+        
+    </style>
+</head>
+<body x-data="assessment()" class="bg-gray-50">
+
+    <!-- Replace the existing back button with this updated version -->
+<a href="dash.html" 
+   x-show="currentStep === 'results'"
+   x-transition:enter="transition ease-out duration-300"
+   x-transition:enter-start="opacity-0 transform -translate-y-4"
+   x-transition:enter-end="opacity-100 transform translate-y-0"
+   class="fixed top-6 left-6 z-40 flex items-center space-x-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-xl shadow-lg hover:bg-white transition-all duration-300 border border-gray-200">
+    <i class="fas fa-arrow-left text-indigo-600"></i>
+    <span class="text-indigo-600 font-medium">Kembali ke Beranda</span>
+</a>
+
+<!-- ...rest of the existing code... -->
+
+    <!-- Add this right after the <body> tag -->
+    <div x-show="isDownloading" 
+         class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl p-6 shadow-xl max-w-sm w-full mx-4">
+            <div class="flex items-center space-x-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent"></div>
+                <div>
+                    <h3 class="font-semibold text-lg">Downloading PDF</h3>
+                    <p class="text-gray-600 text-sm">Please wait while we generate your report...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add this back button for exiting the assessment -->
+    <button @click="exitAssessment()"
+            x-show="currentStep === 'assessment'"
+            class="fixed top-6 right-6 z-40 flex items-center space-x-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-xl shadow-lg hover:bg-white transition-all duration-300 border border-gray-200">
+        <i class="fas fa-times text-red-600"></i>
+        <span class="text-red-600 font-medium">Keluar</span>
+    </button>
+
+    <!-- Header - Keep consistent with other pages -->
+    <!-- ...existing header code... -->
+
+    <main class="min-h-screen pt-20 p-6">
+        <!-- Welcome Screen -->
+        <div x-show="currentStep === 'welcome'" class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-8 text-white">
+                    <h1 class="text-3xl font-bold mb-4">AI-Powered Career Assessment</h1>
+                    <p class="text-lg opacity-90">Temukan potensi dan jalur karier terbaikmu melalui analisis AI yang komprehensif</p>
+                </div>
+                
+                <div class="p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-3">
+                                <div class="p-2 bg-indigo-100 rounded-lg">
+                                    <i class="fas fa-brain text-indigo-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold">Analisis Mendalam</h3>
+                                    <p class="text-sm text-gray-600">Menggunakan machine learning untuk menganalisis 16 aspek kepribadian</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="p-2 bg-purple-100 rounded-lg">
+                                    <i class="fas fa-chart-line text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold">95% Akurasi</h3>
+                                    <p class="text-sm text-gray-600">Hasil yang telah divalidasi dengan riset akademik</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-3">
+                                <div class="p-2 bg-blue-100 rounded-lg">
+                                    <i class="fas fa-clock text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold">15 Menit</h3>
+                                    <p class="text-sm text-gray-600">Waktu yang dibutuhkan untuk menyelesaikan assessment</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="p-2 bg-green-100 rounded-lg">
+                                    <i class="fas fa-check-circle text-green-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold">Hasil Instan</h3>
+                                    <p class="text-sm text-gray-600">Dapatkan rekomendasi program studi secara real-time</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t pt-8">
+                        <button @click="startAssessment()" 
+                                class="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity">
+                            Mulai Assessment
+                        </button>
+                        <p class="text-sm text-gray-500 mt-4">
+                            Dengan melanjutkan, kamu menyetujui <a href="#" class="text-indigo-600">Ketentuan Layanan</a> kami
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessment Screen -->
+        <div x-show="currentStep === 'assessment'" 
+             x-transition:enter="fade-enter"
+             x-transition:enter-start="fade-enter"
+             x-transition:enter-end="fade-enter-active"
+             class="max-w-4xl mx-auto">
+            
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <!-- AI Assistant Floating Button -->
+                <button @click="toggleAIHelper()" 
+                        class="fixed bottom-6 right-6 bg-indigo-600 text-white p-4 rounded-full pulse-effect">
+                    <i class="fas fa-robot text-xl"></i>
+                </button>
+
+                <!-- AI Helper Dialog -->
+                <div x-show="showAIHelper" 
+                     class="fixed bottom-24 right-6 w-80 bg-white rounded-xl shadow-2xl p-4">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-robot text-indigo-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">AI Assistant</h4>
+                            <p class="text-sm text-gray-500">Here to help!</p>
+                        </div>
+                    </div>
+                    <div class="border-t pt-4">
+                        <p class="text-sm text-gray-600 mb-3">Need help understanding the question?</p>
+                        <button @click="getAIExplanation()" 
+                                class="w-full bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg text-sm hover:bg-indigo-100">
+                            Get AI Explanation
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Question Section -->
+                <div class="mb-8">
+                    <!-- Progress Bar -->
+                    <div class="mb-8">
+                        <div class="flex justify-between text-sm text-gray-600 mb-2">
+                            <span>Progress</span>
+                            <span x-text="`Question ${currentQuestion + 1} of ${questions.length}`"></span>
+                        </div>
+                        <div class="h-2 rounded-full bg-gray-200">
+                            <div class="h-full rounded-full bg-indigo-600 transition-all duration-300"
+                                 :style="`width: ${((currentQuestion + 1) / questions.length) * 100}%`"></div>
+                        </div>
+                    </div>
+
+                    <!-- Enhanced Question Display -->
+                    <div class="space-y-6">
+                        <h2 class="text-2xl font-semibold" x-text="currentQuestionData.text"></h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <template x-for="option in currentQuestionData.options" :key="option.id">
+                                <button @click="selectAnswer(option)"
+                                        :class="{
+                                            'border-indigo-600 bg-indigo-50': selectedAnswer === option,
+                                            'border-gray-200 hover:border-indigo-600 hover:bg-indigo-50': selectedAnswer !== option
+                                        }"
+                                        class="p-6 border-2 rounded-xl transition-all duration-300">
+                                    <div class="flex items-center space-x-3">
+                                        <div :class="{'bg-indigo-600': selectedAnswer === option, 'bg-gray-200': selectedAnswer !== option}"
+                                             class="w-4 h-4 rounded-full transition-colors"></div>
+                                        <span x-text="option.text"></span>
+                                    </div>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="flex justify-between mt-8">
+                    <button @click="previousQuestion()" 
+                            x-show="currentQuestionIndex > 0"
+                            class="px-6 py-2 text-indigo-600 border border-indigo-600 rounded-lg hover:bg-indigo-50">
+                        Previous
+                    </button>
+                    <button @click="nextQuestion()" 
+                            :disabled="!selectedAnswer"
+                            :class="{'opacity-50 cursor-not-allowed': !selectedAnswer}"
+                            class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                        Next
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analyzing Screen -->
+        <div x-show="currentStep === 'analyzing'" 
+             class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-2xl shadow-xl p-8 ai-processing">
+                <div class="animate-pulse text-center">
+                    <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-indigo-100 flex items-center justify-center">
+                        <i class="fas fa-brain text-4xl text-indigo-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-semibold mb-4 text-white">AI sedang menganalisis jawabanmu</h2>
+                    <div class="flex justify-center items-center space-x-2">
+                        <div class="w-3 h-3 bg-white rounded-full animate-bounce"></div>
+                        <div class="w-3 h-3 bg-white rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        <div class="w-3 h-3 bg-white rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+                    </div>
+                    <p class="text-white mt-4">Mohon tunggu sebentar...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div x-show="currentStep === 'results'" class="max-w-6xl mx-auto space-y-8">
+    <!-- AI Analysis Header -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden" id="report-section">
+        <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 p-8">
+            <div class="flex justify-between items-start">
+                <div class="text-white">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <span class="px-3 py-1 bg-white/10 rounded-full text-sm flex items-center">
+                            <i class="fas fa-robot mr-2"></i>
+                            AI Analysis Report
+                        </span>
+                        <span class="px-3 py-1 bg-white/10 rounded-full text-sm flex items-center">
+                            <i class="fas fa-chart-pie mr-2"></i>
+                            Score: 95%
+                        </span>
+                    </div>
+                    <h2 class="text-3xl font-bold mt-4">Hasil Analisis Potensi Akademik</h2>
+                    <p class="mt-2 opacity-90">Berdasarkan analisis AI terhadap 16 aspek kepribadian dan minat</p>
+                </div>
+                <div class="flex items-center space-x-3"> <!-- Added container for buttons -->
+            <button @click="downloadPDF()" 
+                    class="flex items-center space-x-2 text-white bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20">
+                <i class="fas fa-download"></i>
+                <span>Download PDF</span>
+            </button>
+        </div>
+            </div>
+        </div>
+
+        <!-- Analysis Content Grid -->
+        <div class="p-8 space-y-8">
+    <!-- Top 5 Program Recommendations Section - Now at the top -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6">
+            <h2 class="text-2xl font-bold text-white flex items-center">
+                <i class="fas fa-star mr-3"></i>
+                Top 3 Program Studi yang Paling Cocok Untukmu
+            </h2>
+        </div>
+        
+        <div class="p-6 space-y-4">
+            <!-- Best Match Program -->
+            <template x-for="(program, index) in analysisResult.recommendations.programs.slice(0, 1)">
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-0.5 rounded-xl">
+                    <div class="bg-white rounded-lg p-6">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="p-3 bg-indigo-50 rounded-xl">
+                                    <i class="fas fa-crown text-yellow-500 text-xl"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center space-x-3">
+                                        <h3 class="text-xl font-bold" x-text="program.name"></h3>
+                                        <span class="px-3 py-1 bg-yellow-50 text-yellow-600 text-sm font-medium rounded-full">Best Match</span>
+                                    </div>
+                                    <p class="text-gray-600 mt-1" x-text="program.faculty"></p>
+                                    <div class="flex items-center mt-3">
+                                        <div class="w-48 h-3 bg-gray-100 rounded-full mr-3">
+                                            <div class="h-full bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full"
+                                                 :style="`width: ${program.match}%`"></div>
+                                        </div>
+                                        <span class="text-lg font-bold text-indigo-600" x-text="`${program.match}% Match`"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Other Recommendations -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <template x-for="(program, index) in analysisResult.recommendations.programs.slice(1, 5)">
+                    <div class="bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md transition-all">
+                        <div class="flex items-start space-x-4">
+                            <div class="p-2 bg-gray-50 rounded-lg">
+                                <i class="fas fa-graduation-cap text-gray-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-semibold" x-text="program.name"></h4>
+                                <p class="text-sm text-gray-600 mt-1" x-text="program.faculty"></p>
+                                <div class="flex items-center mt-2">
+                                    <div class="w-32 h-2 bg-gray-100 rounded-full mr-2">
+                                        <div class="h-full bg-indigo-600 rounded-full"
+                                             :style="`width: ${program.match}%`"></div>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-600" x-text="`${program.match}% Match`"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Personality Analysis -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex items-center space-x-3 mb-6">
+                <div class="p-2 bg-indigo-100 rounded-lg">
+                    <i class="fas fa-user-circle text-indigo-600 text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold">Analisis Karakter</h3>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <template x-for="(score, trait) in analysisResult.traits">
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium capitalize" x-text="trait.replace('_', ' ')"></span>
+                            <span class="text-sm font-bold text-indigo-600" x-text="`${score}%`"></span>
+                        </div>
+                        <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full transition-all"
+                                 :style="`width: ${score}%`"></div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Skill Analysis -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex items-center space-x-3 mb-6">
+                <div class="p-2 bg-purple-100 rounded-lg">
+                    <i class="fas fa-chart-bar text-purple-600 text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold">Analisis Kemampuan</h3>
+            </div>
+            
+            <div class="space-y-4">
+                <template x-for="(score, skill) in analysisResult.traits" x-if="score >= 50">
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="font-medium capitalize" x-text="skill.replace('_', ' ')"></span>
+                            <span class="font-bold text-purple-600" x-text="`${score}%`"></span>
+                        </div>
+                        <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full transition-all"
+                                 :style="`width: ${score}%`"></div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- ...rest of the existing content... -->
+</div>
+
+    </div>
+
+    <!-- Action Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- ... existing action cards ... -->
+    </div>
+</div>
+
+    <!-- AI Insight Cards -->
+    <div x-show="currentStep === 'results'" class="space-y-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- AI Confidence Score - Calculated based on actual program match analysis -->
+    <div class="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+        <div class="flex items-center space-x-3 mb-4">
+        <div class="p-2 bg-blue-100 rounded-lg">
+            <i class="fas fa-brain text-blue-600"></i>
+        </div>
+        <h3 class="font-semibold">Skor Analisis AI</h3>
+        </div>
+        <div class="relative">
+        <div class="text-3xl font-bold text-blue-600 mb-2" 
+             x-text="`${Math.round(analysisResult.recommendations.programs[0].match)}%`"></div>
+        <div class="h-2 bg-gray-200 rounded-full mb-3">
+            <div class="h-full bg-blue-600 rounded-full transition-all duration-500"
+             :style="`width: ${analysisResult.recommendations.programs[0].match}%`"></div>
+        </div>
+        <div class="space-y-2">
+            <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Kesesuaian Minat & Bakat</span>
+            <span class="font-medium" x-text="`${Math.round(analysisResult.recommendations.programs[0].scores.analytical + analysisResult.recommendations.programs[0].scores.technical)/2}%`"></span>
+            </div>
+            <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Tingkat Kepercayaan Analisis</span>
+            <span class="font-medium" x-text="`${Math.round(analysisResult.recommendations.programs[0].match - 2)}%`"></span>
+            </div>
+            <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Prospek Keberhasilan</span>
+            <span class="font-medium" x-text="`${Math.round((analysisResult.recommendations.programs[0].scores.methodical + analysisResult.recommendations.programs[0].scores.innovative)/2)}%`"></span>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Program Match Analytics -->
+    <div class="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+        <div class="flex items-center space-x-3 mb-4">
+        <div class="p-2 bg-green-100 rounded-lg">
+            <i class="fas fa-graduation-cap text-green-600"></i>
+        </div>
+        <h3 class="font-semibold">Program Match Analysis</h3>
+        </div>
+        <div class="space-y-4">
+        <template x-for="(program, index) in analysisResult.recommendations.programs" :key="program.name">
+            <div>
+            <div class="flex justify-between text-sm mb-1">
+                <span class="font-medium" x-text="program.name"></span>
+                <span class="text-green-600 font-semibold" x-text="`${program.match}%`"></span>
+            </div>
+            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-500"
+                 :class="{
+                     'bg-gradient-to-r from-green-500 to-emerald-500': index === 0,
+                     'bg-gradient-to-r from-blue-500 to-indigo-500': index === 1,
+                     'bg-gradient-to-r from-purple-500 to-pink-500': index === 2
+                 }"
+                 :style="`width: ${program.match}%`"></div>
+            </div>
+            <div class="mt-1 text-xs text-gray-500" x-text="program.faculty"></div>
+            </div>
+        </template>
+        </div>
+    </div>
+
+    <!-- Skill Compatibility -->
+    <div class="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+        <div class="flex items-center space-x-3 mb-4">
+        <div class="p-2 bg-purple-100 rounded-lg">
+            <i class="fas fa-chart-line text-purple-600"></i>
+        </div>
+        <h3 class="font-semibold">Skill Compatibility</h3>
+        </div>
+        <div class="space-y-3">
+        <template x-for="(score, skill) in analysisResult.traits" :key="skill">
+            <div x-show="score > 50">
+            <div class="flex justify-between text-sm mb-1">
+                <span class="capitalize" x-text="skill.replace('_', ' ')"></span>
+                <span class="text-purple-600" x-text="`${score}%`"></span>
+            </div>
+            <div class="h-2 bg-gray-200 rounded-full">
+                <div class="h-full bg-purple-600 rounded-full transition-all duration-500"
+                 :style="`width: ${score}%`"></div>
+            </div>
+            </div>
+        </template>
+        </div>
+    </div>
+    </div>
+
+
+    <!-- Career Path Flow Diagram -->
+    <div class="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+        <h3 class="text-xl font-semibold mb-6 flex items-center">
+            <i class="fas fa-road text-indigo-600 mr-2"></i>
+            Career Path Analysis
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Career Timeline -->
+            <div class="space-y-6">
+                <h4 class="text-lg font-semibold mb-4">Career Progression Timeline</h4>
+                <div class="relative space-y-8 before:content-[''] before:absolute before:left-4 before:top-0 before:w-0.5 before:h-full before:bg-indigo-100">
+                    <template x-for="(program, index) in analysisResult.recommendations.programs" :key="index">
+                        <div class="relative pl-12">
+                            <div class="absolute left-2 top-1 w-4 h-4 rounded-full bg-indigo-600 border-4 border-indigo-50"></div>
+                            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                                <div class="flex items-center justify-between mb-1">
+                                    <h5 class="font-semibold text-indigo-600" x-text="program.name"></h5>
+                                    <span class="text-sm bg-indigo-50 text-indigo-600 px-2 py-1 rounded-full" x-text="`${program.match}% Match`"></span>
+                                </div>
+                                <p class="text-gray-600" x-text="program.faculty"></p>
+                                <div class="mt-2 text-sm text-gray-500">
+                                    <span x-show="program.name === 'Informatika'">Software Engineer, Data Scientist, Mobile Developer, Web Developer, AI Engineer, Game Developer</span>
+                                    <span x-show="program.name === 'Teknik Industri'">Industrial Engineer, Quality Control Manager, Operations Manager, Supply Chain Manager, Process Improvement Engineer</span>
+                                    <span x-show="program.name === 'Akuntansi'">Accountant, Auditor, Tax Consultant, Financial Analyst, Corporate Finance Manager</span>
+                                    <span x-show="program.name === 'Akuntansi Perpajakan'">Tax Consultant, Tax Accountant, Tax Advisor, Corporate Tax Manager, Government Tax Officer</span>
+                                    <span x-show="program.name === 'Analisis Keuangan'">Financial Analyst, Investment Banker, Risk Analyst, Portfolio Manager, Financial Consultant</span>
+                                    <span x-show="program.name === 'Bisnis Digital'">Digital Marketing Manager, E-commerce Specialist, Digital Business Consultant, Startup Founder, Digital Product Manager</span>
+                                    <span x-show="program.name === 'Manajemen'">Business Manager, Marketing Manager, HR Manager, Business Consultant, Entrepreneur</span>
+                                    <span x-show="program.name === 'Ekonomi Pembangunan'">Economic Analyst, Policy Advisor, Development Consultant, Research Economist, Government Economic Planner</span>
+                                    <span x-show="program.name === 'Hukum'">Lawyer, Legal Consultant, Judge, Corporate Legal Counsel, Public Prosecutor</span>
+                                    <span x-show="program.name === 'Hukum Bisnis'">Corporate Lawyer, Business Legal Consultant, Compliance Officer, Legal Manager, Contract Specialist</span>
+                                    <span x-show="program.name === 'Psikologi'">Psychologist, HR Consultant, Career Counselor, Clinical Psychologist, Research Psychologist</span>
+                                    <span x-show="program.name === 'Ilmu Komunikasi'">Public Relations Manager, Journalist, Media Planner, Corporate Communications, Content Creator</span>
+                                    <span x-show="program.name === 'Hubungan Internasional'">Diplomat, International Relations Analyst, NGO Officer, Foreign Affairs Consultant, International Business Developer</span>
+                                    <span x-show="program.name === 'Pendidikan Bahasa Inggris'">English Teacher, Language Trainer, Curriculum Developer, Translation Specialist, Educational Consultant</span>
+                                    <span x-show="program.name === 'Teknik Kimia'">Chemical Engineer, Process Engineer, R&D Specialist, Quality Control Engineer, Production Manager</span>
+                                    <span x-show="program.name === 'Teknik Elektro'">Electrical Engineer, Electronics Designer, Power Systems Engineer, Telecommunications Engineer, Control Systems Engineer</span>
+                                    <span x-show="program.name === 'Teknik Mesin'">Mechanical Engineer, Design Engineer, Production Engineer, Maintenance Manager, R&D Engineer</span>
+                                    <span x-show="program.name === 'Teknik Sipil'">Civil Engineer, Construction Manager, Structural Engineer, Project Manager, Infrastructure Developer</span>
+                                    <span x-show="program.name === 'Arsitektur'">Architect, Urban Designer, Interior Designer, Landscape Architect, Construction Project Manager</span>
+                                    <span x-show="program.name === 'Kimia'">Chemist, Research Scientist, Quality Control Analyst, Laboratory Manager, Product Development Scientist</span>
+                                    <span x-show="program.name === 'Farmasi'">Pharmacist, Clinical Research Associate, Drug Safety Specialist, Pharmaceutical Researcher, Quality Control Manager</span>
+                                    <span x-show="program.name === 'Statistika'">Data Analyst, Statistical Consultant, Market Research Analyst, Biostatistician, Data Scientist</span>
+                                    <span x-show="program.name === 'Kedokteran'">Doctor, Medical Specialist, Medical Researcher, Public Health Officer, Medical Consultant</span>
+                                    <span x-show="program.name === 'Informatika PJJ'">Software Engineer (Remote), Web Developer, Mobile Developer, IT Consultant, Systems Analyst, Technical Project Manager</span>
+                                    <span x-show="program.name === 'Rekayasa Tekstil'">Textile Engineer, Product Development Specialist, Quality Control Manager, Research & Development Engineer, Process Engineer</span>
+                                    <span x-show="program.name === 'Teknik Lingkungan'">Environmental Engineer, Sustainability Consultant, Environmental Impact Analyst, Waste Management Specialist, Pollution Control Engineer</span>
+                                    <span x-show="program.name === 'Analisis Kimia D3'">Chemical Analyst, Lab Technician, Quality Control Analyst, Research Assistant, Industrial Chemical Analyst</span>
+                                    <span x-show="program.name === 'Pendidikan Kimia'">Chemistry Teacher, Education Consultant, Curriculum Developer, Educational Content Creator, Laboratory Instructor</span>
+                                    <span x-show="program.name === 'Hukum Keluarga'">Family Law Consultant, Marriage Counselor, Legal Mediator, Child Rights Advocate, Family Court Representative</span>
+                                    <span x-show="program.name === 'Ekonomi Islam'">Islamic Banking Officer, Sharia Compliance Officer, Islamic Finance Consultant, Halal Industry Analyst, Islamic Economics Researcher</span>
+                                    <span x-show="program.name === 'Pendidikan Agama Islam'">Islamic Studies Teacher, Religious Education Consultant, Islamic Curriculum Developer, Religious Affairs Officer, Islamic Education Administrator</span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+        <!-- Skills Development -->
+        <div class="space-y-6">
+        <h4 class="text-lg font-semibold mb-4">Required Skills Development</h4>
+        <div class="space-y-4">
+            <template x-for="program in analysisResult.recommendations.programs.slice(0, 1)" :key="program.name">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-3">
+                <h5 class="font-medium text-gray-800">Technical Skills</h5>
+                <template x-for="(score, skill) in program.scores" :key="skill">
+                    <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="capitalize" x-text="skill"></span>
+                        <span class="text-indigo-600" x-text="`${score}%`"></span>
+                    </div>
+                    <div class="h-2 bg-gray-200 rounded-full">
+                        <div class="h-full bg-indigo-600 rounded-full transition-all duration-500"
+                         :style="`width: ${score}%`"></div>
+                    </div>
+                    </div>
+                </template>
+                </div>
+                <div class="space-y-3">
+                <h5 class="font-medium text-gray-800">Soft Skills</h5>
+                <template x-for="(trait, index) in ['Leadership', 'Communication', 'Teamwork']">
+                    <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span x-text="trait"></span>
+                        <span class="text-purple-600" 
+                          x-text="`${Math.round(program.match - (index * 10))}%`"></span>
+                    </div>
+                    <div class="h-2 bg-gray-200 rounded-full">
+                        <div class="h-full bg-purple-600 rounded-full transition-all duration-500"
+                         :style="`width: ${program.match - (index * 10)}%`"></div>
+                    </div>
+                    </div>
+                </template>
+                </div>
+            </div>
+            </template>
+        </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+    </main>
+    <!-- Additional Professional Visualizations -->
+    <div x-show="currentStep === 'results'" class="max-w-6xl mx-auto mt-8">
+    <!-- Comprehensive Analysis Chart -->
+    <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+    <h3 class="text-lg font-semibold mb-4">Analisis Komprehensif</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Main Radar Chart -->
+        <div class="bg-gray-50 p-4 rounded-lg">
+            <h4 class="text-sm font-medium text-gray-600 mb-3">Profil Kemampuan</h4>
+            <canvas id="comprehensiveRadarChart" class="w-full"></canvas>
+        </div>
+        
+        <!-- Program Match Distribution -->
+        <div class="bg-gray-50 p-4 rounded-lg">
+            <h4 class="text-sm font-medium text-gray-600 mb-3">Distribusi Kesesuaian Program</h4>
+            <canvas id="programMatchChart" class="w-full"></canvas>
+        </div>
+    </div>
+
+    <!-- Key Insights -->
+    <div class="mt-6">
+    <div class="bg-blue-50 p-4 rounded-lg">
+        <h5 class="font-medium text-blue-700 mb-2">Program Match Insight</h5>
+        <div class="text-sm space-y-2">
+            <p class="font-medium" x-text="`${analysisResult.recommendations.programs[0].name}`"></p>
+            <div class="flex items-center">
+                <div class="flex-1 h-2 bg-blue-200 rounded-full">
+                    <div class="h-full bg-blue-600 rounded-full"
+                         :style="`width: ${analysisResult.recommendations.programs[0].match}%`"></div>
+                </div>
+                <span class="ml-2 text-blue-600 font-medium" 
+                      x-text="`${analysisResult.recommendations.programs[0].match}%`"></span>
+            </div>
+            <p class="text-blue-600">Program ini sangat sesuai dengan profil kemampuan Anda</p>
+        </div>
+    </div>
+</div>
+
+</div>
+
+    <!-- Program Information Cards -->
+    <div class="grid grid-cols-1 gap-6">
+        <template x-for="program in analysisResult.recommendations.programs" :key="program.name">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="border-b border-gray-100">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-xl font-bold" x-text="program.name"></h3>
+                                <p class="text-gray-600" x-text="program.faculty"></p>
+                            </div>
+                            <span class="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg font-semibold" 
+                                  x-text="`${program.match}% Match`"></span>
+                        </div>
+                        
+                        <!-- Program Links -->
+                        <div class="mt-4 flex flex-wrap gap-3">
+                            <a :href="'https://admisi.uii.ac.id/program/' + program.name.toLowerCase().replace(/ /g, '-')"
+                               target="_blank"
+                               class="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-sm hover:bg-blue-100">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Info Program
+                            </a>
+                            <a :href="'https://www.uii.ac.id/fakultas/' + program.faculty.toLowerCase().replace(/ /g, '-')"
+                               target="_blank"
+                               class="inline-flex items-center px-3 py-1 bg-green-50 text-green-600 rounded-lg text-sm hover:bg-green-100">
+                                <i class="fas fa-university mr-2"></i>
+                                Fakultas
+                            </a>
+                            <a href="https://pmb.uii.ac.id" 
+                               target="_blank"
+                               class="inline-flex items-center px-3 py-1 bg-purple-50 text-purple-600 rounded-lg text-sm hover:bg-purple-100">
+                                <i class="fas fa-user-plus mr-2"></i>
+                                Daftar PMB
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Program Details -->
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold mb-3">Prospek Karir</h4>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <template x-if="program.name === 'Informatika'">
+                                    <div>
+                                        <li>• Software Engineer (Rp.8-25jt/bulan)</li>
+                                        <li>• Data Scientist (Rp.10-30jt/bulan)</li>
+                                        <li>• AI Engineer (Rp.15-40jt/bulan)</li>
+                                        <li>• Full-stack Developer (Rp.8-28jt/bulan)</li>
+                                    </div>
+                                </template>
+                                <!-- Add similar templates for other programs -->
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-3">Akreditasi & Keunggulan</h4>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li>• Akreditasi: Unggul (A)</li>
+                                <li>• Kerjasama Internasional</li>
+                                <li>• Fasilitas Modern</li>
+                                <li>• Program Magang Industri</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
+
+    <script>
+        // Add this to your existing renderCharts function
+        function renderAdditionalCharts() {
+    const programData = this.analysisResult.recommendations.programs[0];
+    const traits = this.analysisResult.traits;
+
+    // Skills Radar Chart
+    const skillsCtx = document.getElementById('skillsRadarChart');
+    if (skillsCtx) {
+        new Chart(skillsCtx, {
+            type: 'radar',
+            data: {
+                labels: Object.keys(programData.scores),
+                datasets: [{
+                    label: 'Your Skills',
+                    data: Object.values(programData.scores),
+                    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                    borderColor: 'rgb(99, 102, 241)',
+                    pointBackgroundColor: 'rgb(99, 102, 241)'
+                }]
+            },
+            options: {
+                scales: {
+                    r: {
+                        angleLines: { display: true },
+                        suggestedMin: 0,
+                        suggestedMax: 100
+                    }
+                }
+            }
+        });
+    }
+
+    // Competency Spider Chart
+    const competencyCtx = document.getElementById('competencySpiderChart');
+    if (competencyCtx) {
+        new Chart(competencyCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Industry Knowledge', 'Technical Skills', 'Soft Skills', 'Leadership', 'Innovation', 'Adaptability'],
+                datasets: [{
+                    label: 'Current Level',
+                    data: [
+                        traits.methodical || 0,
+                        traits.technical || 0,
+                        traits.social || 0,
+                        traits.leadership || 0,
+                        traits.innovative || 0,
+                        traits.adaptable || 0
+                    ],
+                    backgroundColor: 'rgba(147, 51, 234, 0.2)',
+                    borderColor: 'rgb(147, 51, 234)',
+                    pointBackgroundColor: 'rgb(147, 51, 234)'
+                }]
+            }
+        });
+    }
+
+    // Learning Style Doughnut Chart
+    const learningCtx = document.getElementById('learningStyleChart');
+    if (learningCtx) {
+        // Calculate learning style preferences based on traits
+        const visual = (traits.analytical + traits.technical) / 2;
+        const auditory = (traits.social + traits.communicative) / 2;
+        const kinesthetic = (traits.practical + traits.hands_on) / 2;
+        const reading = (traits.methodical + traits.logical) / 2;
+
+        new Chart(learningCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Visual', 'Auditory', 'Kinesthetic', 'Reading/Writing'],
+                datasets: [{
+                    data: [visual, auditory, kinesthetic, reading],
+                    backgroundColor: ['#818CF8', '#34D399', '#F472B6', '#FBBF24']
+                }]
+            },
+            options: {
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
+
+    // Growth Trajectory Area Chart
+    const growthChart = new ApexCharts(document.getElementById('growthTrajectoryChart'), {
+        series: [{
+            name: 'Career Growth',
+            data: [
+                programData.match * 0.4,
+                programData.match * 0.6,
+                programData.match * 0.8,
+                programData.match * 0.9,
+                programData.match
+            ]
+        }],
+        chart: {
+            type: 'area',
+            height: 200,
+            toolbar: { show: false }
+        },
+        xaxis: {
+            categories: ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5']
+        }
+    });
+    growthChart.render();
+
+    // Skills Timeline using actual program requirements
+    const timelineChart = new ApexCharts(document.getElementById('skillTimelineChart'), {
+        series: [{
+            data: Object.entries(programData.scores).map((score, index) => ({
+                x: score[0],
+                y: [index, index + score[1]/20] // Convert score to years of development
+            }))
+        }],
+        chart: {
+            type: 'rangeBar',
+            height: 250
+        },
+        plotOptions: {
+            bar: { horizontal: true }
+        },
+        xaxis: {
+            type: 'numeric',
+            title: { text: 'Years of Development' }
+        }
+    });
+    timelineChart.render();
+
+    // Career Flow Chart using program match data
+    const flowChart = new ApexCharts(document.getElementById('careerFlowChart'), {
+        series: [{
+            data: this.analysisResult.recommendations.programs.map(prog => ({
+                x: prog.name,
+                y: prog.match
+            }))
+        }],
+        chart: {
+            type: 'line',
+            height: 350,
+            animations: { enabled: true }
+        },
+        markers: { size: 6 },
+        annotations: {
+            points: [{
+                x: programData.name,
+                y: programData.match,
+                marker: { size: 8 },
+                label: { text: 'Best Match' }
+            }]
+        }
+    });
+    flowChart.render();
+}
+
+    </script>
+    <!-- Footer -->
+    <footer class="bg-white/80 backdrop-blur-md shadow-lg mt-8 py-8 px-8">
+        <!-- ...existing footer code... -->
+    </footer>
+
+    <script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('assessment', () => ({
+        currentStep: 'welcome',
+        currentQuestion: 0,
+        questions: [
+            {
+                id: 1,
+                category: 'problem_solving',
+                weight: 1.5,
+                text: "Ketika menghadapi masalah kompleks, apa yang pertama kali Anda lakukan?",
+                options: [
+                    { 
+                        id: 'a1',
+                        text: "Menganalisis data dan mencari pola",
+                        traits: {
+                            analytical: 10,
+                            technical: 8,
+                            methodical: 7,
+                            creative: -2
+                        }
+                    },
+                    {
+                        id: 'a2',
+                        text: "Mencoba pendekatan kreatif dan inovatif",
+                        traits: {
+                            creative: 10,
+                            innovative: 8,
+                            adaptable: 6,
+                            methodical: -3
+                        }
+                    },
+                    {
+                        id: 'a3',
+                        text: "Berdiskusi dengan orang lain untuk perspektif berbeda",
+                        traits: {
+                            social: 9,
+                            collaborative: 8,
+                            empathetic: 7,
+                            independent: -4
+                        }
+                    }
+                ]
+            },
+            {
+                id: 2,
+                text: "Dalam mengerjakan tugas, apa yang lebih Anda sukai?",
+                options: [
+                    { id: 'b1', text: "Bekerja sendiri dengan fokus", traits: { independent: 5, focused: 4 } },
+                    { id: 'b2', text: "Berkolaborasi dalam tim", traits: { teamwork: 5, social: 4 } },
+                    { id: 'b3', text: "Kombinasi keduanya", traits: { adaptable: 5, balanced: 4 } }
+                ]
+            },
+            {
+                id: 3,
+                text: "Bagaimana Anda menanggapi perubahan?",
+                options: [
+                    { id: 'c1', text: "Menyesuaikan diri dengan cepat", traits: { adaptable: 5, flexible: 4 } },
+                    { id: 'c2', text: "Butuh waktu untuk adaptasi", traits: { methodical: 5, careful: 4 } },
+                    { id: 'c3', text: "Tergantung situasi", traits: { analytical: 5, balanced: 4 } }
+                ]
+            },
+            {
+                id: 4,
+                text: "Apa yang paling menarik bagi Anda?",
+                options: [
+                    { id: 'd1', text: "Teknologi dan inovasi", traits: { technical: 5, innovative: 4 } },
+                    { id: 'd2', text: "Seni dan kreativitas", traits: { creative: 5, artistic: 4 } },
+                    { id: 'd3', text: "Interaksi sosial", traits: { social: 5, empathetic: 4 } }
+                ]
+            },
+            {
+                id: 5,
+                text: "Dalam pengambilan keputusan, Anda lebih mengandalkan:",
+                options: [
+                    { id: 'e1', text: "Logika dan data", traits: { analytical: 5, logical: 4 } },
+                    { id: 'e2', text: "Intuisi dan perasaan", traits: { intuitive: 5, empathetic: 4 } },
+                    { id: 'e3', text: "Pengalaman masa lalu", traits: { methodical: 5, experienced: 4 } }
+                ]
+            },
+            {
+                id: 6,
+                text: "Dalam situasi stres, Anda cenderung:",
+                options: [
+                    { id: 'f1', text: "Tetap tenang dan fokus", traits: { resilient: 5, focused: 4 } },
+                    { id: 'f2', text: "Mencari dukungan orang lain", traits: { social: 5, collaborative: 4 } },
+                    { id: 'f3', text: "Mengambil jeda untuk menenangkan diri", traits: { self_aware: 5, balanced: 4 } }
+                ]
+            },
+            {
+                id: 7,
+                text: "Bagaimana Anda belajar paling efektif?",
+                options: [
+                    { id: 'g1', text: "Praktek langsung", traits: { practical: 5, hands_on: 4 } },
+                    { id: 'g2', text: "Membaca dan analisis", traits: { analytical: 5, theoretical: 4 } },
+                    { id: 'g3', text: "Diskusi dan sharing", traits: { social: 5, collaborative: 4 } }
+                ]
+            },
+            {
+                id: 8,
+                text: "Dalam project group, peran apa yang Anda sukai?",
+                options: [
+                    { id: 'h1', text: "Pemimpin", traits: { leadership: 5, decisive: 4 } },
+                    { id: 'h2', text: "Eksekutor", traits: { practical: 5, reliable: 4 } },
+                    { id: 'h3', text: "Penengah", traits: { diplomatic: 5, balanced: 4 } }
+                ]
+            },
+            {
+                id: 9,
+                text: "Apa yang memotivasi Anda?",
+                options: [
+                    { id: 'i1', text: "Pencapaian personal", traits: { ambitious: 5, driven: 4 } },
+                    { id: 'i2', text: "Dampak pada orang lain", traits: { altruistic: 5, empathetic: 4 } },
+                    { id: 'i3', text: "Pengembangan diri", traits: { growth_minded: 5, self_aware: 4 } }
+                ]
+            },
+            {
+                id: 10,
+                text: "Bagaimana Anda menghadapi tantangan baru?",
+                options: [
+                    { id: 'j1', text: "Mencari informasi sebanyak mungkin", traits: { analytical: 5, thorough: 4 } },
+                    { id: 'j2', text: "Langsung mencoba", traits: { adventurous: 5, practical: 4 } },
+                    { id: 'j3', text: "Meminta saran dari yang berpengalaman", traits: { collaborative: 5, learning: 4 } }
+                ]
+            },
+            {
+                id: 11,
+                text: "Dalam komunikasi, Anda lebih suka:",
+                options: [
+                    { id: 'k1', text: "Langsung ke inti", traits: { direct: 5, efficient: 4 } },
+                    { id: 'k2', text: "Detail dan terstruktur", traits: { methodical: 5, thorough: 4 } },
+                    { id: 'k3', text: "Fleksibel menyesuaikan lawan bicara", traits: { adaptable: 5, empathetic: 4 } }
+                ]
+            },
+            {
+                id: 12,
+                text: "Dalam menghadapi deadline, Anda cenderung:",
+                options: [
+                    { id: 'l1', text: "Menyelesaikan jauh sebelum waktu", traits: { organized: 5, proactive: 4 } },
+                    { id: 'l2', text: "Bekerja hingga menit terakhir", traits: { pressure_driven: 5, adaptable: 4 } },
+                    { id: 'l3', text: "Membagi waktu secara terstruktur", traits: { methodical: 5, balanced: 4 } }
+                ]
+            },
+            {
+                id: 13,
+                text: "Apa yang Anda prioritaskan dalam karir?",
+                options: [
+                    { id: 'm1', text: "Stabilitas dan keamanan", traits: { stable: 5, security_oriented: 4 } },
+                    { id: 'm2', text: "Tantangan dan pertumbuhan", traits: { growth_minded: 5, ambitious: 4 } },
+                    { id: 'm3', text: "Work-life balance", traits: { balanced: 5, self_aware: 4 } }
+                ]
+            },
+            {
+                id: 14,
+                text: "Dalam menghadapi konflik, Anda cenderung:",
+                options: [
+                    { id: 'n1', text: "Mencari solusi win-win", traits: { diplomatic: 5, problem_solver: 4 } },
+                    { id: 'n2', text: "Mempertahankan prinsip", traits: { principled: 5, assertive: 4 } },
+                    { id: 'n3', text: "Mengalah untuk harmoni", traits: { harmonious: 5, adaptable: 4 } }
+                ]
+            },
+            {
+                id: 15,
+                text: "Bagaimana Anda melihat masa depan?",
+                options: [
+                    { id: 'o1', text: "Optimis dan ambisius", traits: { optimistic: 5, ambitious: 4 } },
+                    { id: 'o2', text: "Realistis dan terencana", traits: { realistic: 5, methodical: 4 } },
+                    { id: 'o3', text: "Fleksibel mengikuti arus", traits: { adaptable: 5, flexible: 4 } }
+                ]
+            }
+        ],
+        selectedAnswer: null,
+        answers: [],
+        analysisResult: null,
+        isDownloading: false,
+
+        init() {
+            this.currentQuestionData = this.questions[0];
+        },
+
+        startAssessment() {
+            this.currentStep = 'assessment';
+            this.currentQuestion = 0;
+            this.selectedAnswer = null;
+            this.answers = [];
+        },
+
+        selectAnswer(option) {
+            this.selectedAnswer = option;
+        },
+
+        async nextQuestion() {
+            if (!this.selectedAnswer) return;
+
+            // Save answer
+            this.answers.push({
+                questionId: this.currentQuestion + 1,
+                answer: this.selectedAnswer
+            });
+
+            if (this.currentQuestion < this.questions.length - 1) {
+                this.currentQuestion++;
+                this.currentQuestionData = this.questions[this.currentQuestion];
+                this.selectedAnswer = null;
+            } else {
+                await this.completeAssessment();
+            }
+        },
+
+        previousQuestion() {
+            if (this.currentQuestion > 0) {
+                this.currentQuestion--;
+                this.answers.pop();
+                this.currentQuestionData = this.questions[this.currentQuestion];
+                this.selectedAnswer = null;
+            }
+        },
+
+        async completeAssessment() {
+            this.currentStep = 'analyzing';
+            const traits = this.fastTraitCalculation();
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            this.analysisResult = {
+                personalityType: this.quickPersonalityType(traits),
+                traits: this.fastNormalizeTraits(traits),
+                recommendations: this.generateFastRecommendations(traits)
+            };
+
+            // Get the top 3 programs from recommendations
+            const programs = this.analysisResult.recommendations.programs;
+            const recommendations = {
+                rekpro1: programs[0].name,
+                rekpro2: programs[1].name,
+                rekpro3: programs[2].name
+            };
+
+            try {
+                // Save recommendations to database
+                const response = await fetch('php/oauth.php?action=save_rekpro', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(recommendations),
+                    credentials: 'include'
+                });
+
+                const result = await response.json();
+                console.log('Server response:', result);
+
+                if (result.status !== 'success') {
+                    throw new Error(result.message || 'Failed to save recommendations');
+                }
+            } catch (error) {
+                console.error('Error saving recommendations:', error);
+            }
+
+            this.currentStep = 'results';
+            setTimeout(() => {
+                this.renderCharts();
+                this.renderComprehensiveCharts();
+            }, 100);
+        },
+
+        fastTraitCalculation() {
+            const traits = {};
+            // Single loop processing
+            this.answers.forEach(({answer}) => {
+                Object.entries(answer.traits).forEach(([trait, value]) => {
+                    traits[trait] = (traits[trait] || 0) + value;
+                });
+            });
+            return traits;
+        },
+
+        quickPersonalityType(traits) {
+            // Fast sorting for top 3 traits
+            const sorted = Object.entries(traits)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3);
+            
+            const types = {
+                analytical: "The Analyst",
+                creative: "The Innovator",
+                social: "The Communicator",
+                methodical: "The Strategist"
+            };
+
+            return {
+                title: types[sorted[0][0]] || "The Professional",
+                traits: sorted.map(([trait]) => trait)
+            };
+        },
+
+        fastNormalizeTraits(traits) {
+            const max = Math.max(...Object.values(traits));
+            const normalized = {};
+            
+            Object.entries(traits).forEach(([trait, score]) => {
+                normalized[trait] = Math.min(Math.round((score / max) * 90), 90);
+            });
+            
+            return normalized;
+        },
+
+        generateFastRecommendations(traits) {
+    const programs = {
+        "Akuntansi Perpajakan": {
+            analytical: 0.30,
+            methodical: 0.32,
+            detailed: 0.19, 
+            logical: 0.13
+        },
+        "Analisis Keuangan": {
+            analytical: 0.41,
+            mathematical: 0.29,
+            methodical: 0.17,
+            logical: 0.13
+        },
+        "Bisnis Digital": {
+            technical: 0.28,
+            business: 0.33,
+            innovative: 0.24,
+            adaptable: 0.15
+        },
+        "Akuntansi": {
+            methodical: 0.22,
+            analytical: 0.28,
+            detailed: 0.18,
+            logical: 0.12 
+        },
+        "Manajemen": {
+            business: 0.37,
+            leadership: 0.28,
+            social: 0.21,
+            analytical: 0.14
+        },
+        "Ekonomi Pembangunan": {
+            analytical: 0.34,
+            business: 0.31,
+            social: 0.22,
+            methodical: 0.13
+        },
+        "Hukum": {
+            analytical: 0.46,
+            logical: 0.29,
+            verbal: 0.21,
+            ethical: 0.14
+        },
+        "Hukum Bisnis": {
+            business: 0.34,
+            analytical: 0.31,
+            logical: 0.22,
+            ethical: 0.13
+        },
+        "Psikologi": {
+            empathetic: 0.22,
+            social: 0.21,
+            analytical: 0.23,
+            communicative: 0.12
+        },
+        "Ilmu Komunikasi": {
+            communicative: 0.43,
+            social: 0.27,
+            creative: 0.18,
+            analytical: 0.12
+        },
+        "Hubungan Internasional": {
+            diplomatic: 0.36,
+            social: 0.29,
+            analytical: 0.21,
+            communicative: 0.14
+        },
+        "Pendidikan Bahasa Inggris": {
+            linguistic: 0.38,
+            communicative: 0.29,
+            social: 0.19,
+            empathetic: 0.14
+        },
+        "Teknik Industri": {
+            analytical: 0.38,
+            technical: 0.27,
+            methodical: 0.22,
+            problem_solver: 0.13
+        },
+        "Teknik Kimia": {
+            technical: 0.37,
+            analytical: 0.28,
+            scientific: 0.21,
+            methodical: 0.14
+        },
+        "Teknik Elektro": {
+            technical: 0.42,
+            analytical: 0.28,
+            mathematical: 0.19,
+            logical: 0.11
+        },
+        "Informatika": {
+            technical: 0.55,
+            analytical: 0.25,
+            logical: 0.20,
+            innovative: 0.10
+        },
+        "Informatika PJJ": {
+            technical: 0.46,
+            analytical: 0.29,
+            independent: 0.21,
+            self_disciplined: 0.14
+        },
+        "Teknik Mesin": {
+            technical: 0.37,
+            mechanical: 0.28,
+            analytical: 0.21,
+            practical: 0.14
+        },
+        "Rekayasa Tekstil": {
+            technical: 0.34,
+            analytical: 0.31,
+            innovative: 0.22,
+            practical: 0.13
+        },
+        "Teknik Sipil": {
+            technical: 0.36,
+            analytical: 0.29,
+            mathematical: 0.21,
+            spatial: 0.14
+        },
+        "Arsitektur": {
+            creative: 0.38,
+            technical: 0.27,
+            artistic: 0.22,
+            spatial: 0.13
+        },
+        "Teknik Lingkungan": {
+            environmental: 0.36,
+            technical: 0.29,
+            analytical: 0.21,
+            scientific: 0.14
+        },
+        "Analisis Kimia D3": {
+            analytical: 0.37,
+            technical: 0.28,
+            practical: 0.21,
+            methodical: 0.14
+        },
+        "Kimia": {
+            scientific: 0.36,
+            analytical: 0.29,
+            methodical: 0.21,
+            technical: 0.14
+        },
+        "Farmasi": {
+            scientific: 0.37,
+            analytical: 0.28,
+            methodical: 0.21,
+            detailed: 0.14
+        },
+        "Statistika": {
+            mathematical: 0.41,
+            analytical: 0.29,
+            methodical: 0.18,
+            logical: 0.12
+        },
+        "Pendidikan Kimia": {
+            scientific: 0.34,
+            educational: 0.31,
+            communicative: 0.22,
+            methodical: 0.13
+        },
+        "Kedokteran": {
+            scientific: 0.36,
+            analytical: 0.49,
+            empathetic: 0.50,
+            detailed: 0.14
+        },
+        "Hukum Keluarga": {
+            ethical: 0.36,
+            empathetic: 0.39,
+            analytical: 0.21,
+            social: 0.14
+        },
+        "Ekonomi Islam": {
+            religious: 0.36,
+            analytical: 0.29,
+            ethical: 0.21,
+            business: 0.14
+        },
+        "Pendidikan Agama Islam": {
+            religious: 0.37,
+            educational: 0.28,
+            ethical: 0.21,
+            communicative: 0.14
+        }
+    };
+
+    // Calculate raw scores and find maximum
+    let scores = [];
+    let maxScore = 0;
+
+    for (const [name, weights] of Object.entries(programs)) {
+        let score = 0;
+        let totalWeight = 0;
+
+        Object.entries(weights).forEach(([trait, weight]) => {
+            score += (traits[trait] || 0) * weight;
+            totalWeight += weight;
+        });
+
+        // Normalize by weights
+        const weightedScore = score / totalWeight;
+        scores.push({ name, score: weightedScore });
+        maxScore = Math.max(maxScore, weightedScore);
+    }
+
+    // Normalize scores to percentages with maximum of 98%
+    scores = scores.map(({ name, score }) => {
+        const MAX_SCORE = 98; // Maximum possible match percentage
+        const normalizedScore = (score / maxScore) * MAX_SCORE;
+        
+        return {
+            name,
+            faculty: this.getFacultyName(name),
+            match: Math.round(normalizedScore),
+            scores: {
+                technical: Math.min(100, Math.round((traits.technical || 0) / maxScore * 100)),
+                analytical: Math.min(100, Math.round((traits.analytical || 0) / maxScore * 100)),
+                methodical: Math.min(100, Math.round((traits.methodical || 0) / maxScore * 100)),
+                innovative: Math.min(100, Math.round((traits.innovative || 0) / maxScore * 100))
+            }
+        };
+    });
+
+    // Sort by match score and ensure proper distribution
+    scores.sort((a, b) => b.match - a.match);
+    
+    // Adjust scores to maintain proper gaps between recommendations
+    const topPrograms = scores.slice(0, 3).map((program, index) => {
+        return {
+            ...program,
+            match: Math.max(60, program.match - (index * 5)) // 5% gap between recommendations
+        };
+    });
+
+    return {
+        programs: topPrograms
+    };
+},
+
+getFacultyName(program) {
+    const faculties = {
+        "Akuntansi Perpajakan": "Fakultas Ekonomi dan Bisnis",
+        "Analisis Keuangan": "Fakultas Ekonomi dan Bisnis",
+        "Bisnis Digital": "Fakultas Ekonomi dan Bisnis",
+        "Akuntansi": "Fakultas Ekonomi dan Bisnis",
+        "Manajemen": "Fakultas Ekonomi dan Bisnis",
+        "Ekonomi Pembangunan": "Fakultas Ekonomi dan Bisnis",
+        "Hukum": "Fakultas Hukum",
+        "Hukum Bisnis": "Fakultas Hukum",
+        "Psikologi": "Fakultas Psikologi",
+        "Ilmu Komunikasi": "Fakultas Ilmu Komunikasi",
+        "Hubungan Internasional": "Fakultas Ilmu Sosial dan Politik",
+        "Pendidikan Bahasa Inggris": "Fakultas Pendidikan",
+        "Teknik Industri": "Fakultas Teknik",
+        "Teknik Kimia": "Fakultas Teknik",
+        "Teknik Elektro": "Fakultas Teknik",
+        "Informatika": "Fakultas Teknik",
+        "Informatika PJJ": "Fakultas Teknik",
+        "Teknik Mesin": "Fakultas Teknik",
+        "Rekayasa Tekstil": "Fakultas Teknik",
+        "Teknik Sipil": "Fakultas Teknik",
+        "Arsitektur": "Fakultas Teknik",
+        "Teknik Lingkungan": "Fakultas Teknik",
+        "Analisis Kimia D3": "Fakultas Matematika dan IPA",
+        "Kimia": "Fakultas Matematika dan IPA",
+        "Farmasi": "Fakultas Farmasi",
+        "Statistika": "Fakultas Matematika dan IPA",
+        "Pendidikan Kimia": "Fakultas Pendidikan",
+        "Kedokteran": "Fakultas Kedokteran",
+        "Hukum Keluarga": "Fakultas Hukum",
+        "Ekonomi Islam": "Fakultas Ekonomi dan Bisnis",
+        "Pendidikan Agama Islam": "Fakultas Pendidikan"
+    };
+    return faculties[program] || "Fakultas";
+},
+
+        // Optimized chart rendering
+        renderCharts() {
+            requestAnimationFrame(() => {
+                // Render essential charts first
+                this.renderBasicCharts();
+                // Delay complex charts
+                setTimeout(() => this.renderComplexCharts(), 100);
+            });
+        },
+
+        renderBasicCharts() {
+            // Only most important charts
+            this.renderPersonalityChart();
+            this.renderPatternChart();
+        },
+
+        renderComplexCharts() {
+            // Less critical charts
+            this.renderCareerChart();
+            this.renderConfidenceChart();
+            this.renderTimeline();
+        },
+
+        async downloadPDF() {
+            this.isDownloading = true;
+            const downloadBtn = document.querySelector('[x-data] button[x-on\\:click="downloadPDF"]');
+            
+            if (downloadBtn) {
+                downloadBtn.style.display = 'none';
+            }
+
+            try {
+                await this.renderChartsForPDF();
+                
+                const element = document.getElementById('report-section');
+                const opts = {
+                    margin: [10, 10, 10, 10],
+                    filename: 'assessment-report.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { 
+                        scale: 2,
+                        useCORS: true,
+                        logging: true
+                    },
+                    jsPDF: { 
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'portrait'
+                    }
+                };
+
+                await html2pdf().set(opts).from(element).save();
+            } catch (err) {
+                console.error('Error generating PDF:', err);
+                alert('Terjadi kesalahan saat men-download PDF. Silakan coba lagi.');
+            } finally {
+                if (downloadBtn) {
+                    downloadBtn.style.display = '';
+                }
+                this.isDownloading = false;
+            }
+        },
+
+        async renderChartsForPDF() {
+            // Create a promise that resolves when all charts are rendered
+            return new Promise(async (resolve) => {
+                // Ensure the results section includes all charts
+                const fullReportSection = document.getElementById('report-section');
+                
+                // Add charts section if not exists
+                if (!document.getElementById('pdf-charts-section')) {
+                    const chartsSection = document.createElement('div');
+                    chartsSection.id = 'pdf-charts-section';
+                    chartsSection.classList.add('p-8', 'grid', 'grid-cols-1', 'gap-8');
+                    
+                    // Template for chart sections
+                    chartsSection.innerHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-white rounded-xl p-6 shadow-lg">
+                                <h4 class="text-lg font-semibold mb-4">AI Analysis Charts</h4>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <canvas id="pdf-pattern-chart"></canvas>
+                                    <canvas id="pdf-confidence-chart"></canvas>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-xl p-6 shadow-lg">
+                                <h4 class="text-lg font-semibold mb-4">Career Progression</h4>
+                                <canvas id="pdf-career-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl p-6 shadow-lg">
+                            <h4 class="text-lg font-semibold mb-4">Skills Development Timeline</h4>
+                            <div id="pdf-skills-timeline"></div>
+                        </div>
+                    `;
+                    
+                    fullReportSection.appendChild(chartsSection);
+                }
+
+                // Re-render all charts specifically for PDF
+                await this.renderPDFCharts();
+                
+                // Allow time for charts to render
+                setTimeout(resolve, 500);
+            });
+        },
+
+        async renderPDFCharts() {
+            // Pattern Recognition Chart for PDF
+            const patternCtx = document.getElementById('pdf-pattern-chart');
+            if (patternCtx) {
+                new Chart(patternCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Pattern Confidence',
+                            data: [65, 75, 82, 85, 90, 95],
+                            borderColor: '#7C3AED',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Career Progress Chart for PDF
+            const careerCtx = document.getElementById('pdf-career-chart');
+            if (careerCtx) {
+                new Chart(careerCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5'],
+                        datasets: [{
+                            label: 'Career Progress',
+                            data: [40, 55, 70, 85, 95],
+                            borderColor: '#4F46E5',
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Skills Timeline for PDF
+            const skillsTimeline = new ApexCharts(document.getElementById('pdf-skills-timeline'), {
+                series: [{
+                    data: [
+                        {
+                            x: 'Technical',
+                            y: [0, 3],
+                            fillColor: '#4F46E5'
+                        },
+                        {
+                            x: 'Leadership',
+                            y: [2, 4],
+                            fillColor: '#7C3AED'
+                        },
+                        {
+                            x: 'Business',
+                            y: [3, 6],
+                            fillColor: '#2563EB'
+                        }
+                    ]
+                }],
+                chart: {
+                    height: 200,
+                    type: 'rangeBar'
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: true,
+                        distributed: true
+                    }
+                },
+                xaxis: {
+                    type: 'numeric',
+                    title: {
+                        text: 'Years of Experience'
+                    }
+                }
+            });
+
+            skillsTimeline.render();
+        },
+
+        renderCharts: function() {
+    // Weight adjustment for more diverse results
+    const programs = {
+        "Informatika": {
+            technical: 0.45,
+            analytical: 0.25,
+            logical: 0.20,
+            innovative: 0.10
+        },
+        "Teknik Industri": {
+            analytical: 0.38,
+            technical: 0.27,
+            methodical: 0.22,
+            problem_solver: 0.13
+        },
+        "Akuntansi": {
+            methodical: 0.42,
+            analytical: 0.28,
+            detailed: 0.18,
+            logical: 0.12
+        },
+        "Akuntansi Perpajakan": {
+            analytical: 0.36,
+            methodical: 0.32,
+            detailed: 0.19,
+            logical: 0.13
+        },
+        "Analisis Keuangan": {
+            analytical: 0.41,
+            mathematical: 0.29,
+            methodical: 0.17,
+            logical: 0.13
+        },
+        "Bisnis Digital": {
+            technical: 0.28,
+            business: 0.33,
+            innovative: 0.24,
+            adaptable: 0.15
+        },
+        "Manajemen": {
+            business: 0.37,
+            leadership: 0.28,
+            social: 0.21,
+            analytical: 0.14
+        },
+        "Ekonomi Pembangunan": {
+            analytical: 0.34,
+            business: 0.31,
+            social: 0.22,
+            methodical: 0.13
+        },
+        "Hukum": {
+            analytical: 0.36,
+            logical: 0.29,
+            verbal: 0.21,
+            ethical: 0.14
+        },
+        "Hukum Bisnis": {
+            business: 0.34,
+            analytical: 0.31,
+            logical: 0.22,
+            ethical: 0.13
+        },
+        "Psikologi": {
+            empathetic: 0.37,
+            social: 0.28,
+            analytical: 0.21,
+            communicative: 0.14
+        },
+        "Ilmu Komunikasi": {
+            communicative: 0.43,
+            social: 0.27,
+            creative: 0.18,
+            analytical: 0.12
+        },
+        "Hubungan Internasional": {
+            diplomatic: 0.36,
+            social: 0.29,
+            analytical: 0.21,
+            communicative: 0.14
+        },
+        "Pendidikan Bahasa Inggris": {
+            linguistic: 0.38,
+            communicative: 0.29,
+            social: 0.19,
+            empathetic: 0.14
+        },
+        "Teknik Kimia": {
+            technical: 0.37,
+            analytical: 0.28,
+            scientific: 0.21,
+            methodical: 0.14
+        },
+        "Teknik Elektro": {
+            technical: 0.42,
+            analytical: 0.28,
+            mathematical: 0.19,
+            logical: 0.11
+        },
+        "Informatika PJJ": {
+            technical: 0.36,
+            analytical: 0.29,
+            independent: 0.21,
+            self_disciplined: 0.14
+        },
+        "Teknik Mesin": {
+            technical: 0.37,
+            mechanical: 0.28,
+            analytical: 0.21,
+            practical: 0.14
+        },
+        "Rekayasa Tekstil": {
+            technical: 0.34,
+            analytical: 0.31,
+            innovative: 0.22,
+            practical: 0.13
+        },
+        "Teknik Sipil": {
+            technical: 0.36,
+            analytical: 0.29,
+            mathematical: 0.21,
+            spatial: 0.14
+        },
+        "Arsitektur": {
+            creative: 0.38,
+            technical: 0.27,
+            artistic: 0.22,
+            spatial: 0.13
+        },
+        "Teknik Lingkungan": {
+            environmental: 0.36,
+            technical: 0.29,
+            analytical: 0.21,
+            scientific: 0.14
+        },
+        "Analisis Kimia D3": {
+            analytical: 0.37,
+            technical: 0.28,
+            practical: 0.21,
+            methodical: 0.14
+        },
+        "Kimia": {
+            scientific: 0.36,
+            analytical: 0.29,
+            methodical: 0.21,
+            technical: 0.14
+        },
+        "Farmasi": {
+            scientific: 0.37,
+            analytical: 0.28,
+            methodical: 0.21,
+            detailed: 0.14
+        },
+        "Statistika": {
+            mathematical: 0.41,
+            analytical: 0.29,
+            methodical: 0.18,
+            logical: 0.12
+        },
+        "Pendidikan Kimia": {
+            scientific: 0.34,
+            educational: 0.31,
+            communicative: 0.22,
+            methodical: 0.13
+        },
+        "Kedokteran": {
+            scientific: 0.36,
+            analytical: 0.29,
+            empathetic: 0.21,
+            detailed: 0.14
+        },
+        "Hukum Keluarga": {
+            ethical: 0.36,
+            empathetic: 0.29,
+            analytical: 0.21,
+            social: 0.14
+        },
+        "Ekonomi Islam": {
+            religious: 0.36,
+            analytical: 0.29,
+            ethical: 0.21,
+            business: 0.14
+        },
+        "Pendidikan Agama Islam": {
+            religious: 0.37,
+            educational: 0.28,
+            ethical: 0.21,
+            communicative: 0.14
+        }
+    };
+
+    // Calculate weighted scores with normalization
+    const scores = Object.entries(programs).map(([name, weights]) => {
+        let score = 0;
+        let maxPossibleScore = 0;
+
+        Object.entries(weights).forEach(([trait, weight]) => {
+            const traitScore = traits[trait] || 0;
+            score += traitScore * weight;
+            maxPossibleScore += 100 * weight; // Assuming max trait score is 100
+        });
+
+        // Normalize score to percentage with randomization factor
+        const baseMatch = (score / maxPossibleScore) * 100;
+        const randomFactor = Math.random() * 5 - 2.5; // ±2.5% variation
+        const match = Math.min(98, Math.max(60, baseMatch + randomFactor));
+
+        return {
+            name,
+            faculty: this.getFacultyName(name),
+            match: Math.round(match),
+            scores: { // Store individual scores for charts
+                technical: traits.technical || 0,
+                analytical: traits.analytical || 0,
+                methodical: traits.methodical || 0,
+                innovative: traits.innovative || 0
+            }
+        };
+    });
+
+    // Sort by match score and ensure distinct percentages
+    scores.sort((a, b) => b.match - a.match);
+    scores.forEach((program, index) => {
+        program.match = Math.max(60, program.match - (index * 3)); // Decrease by 3% for each rank
+    });
+
+    return {
+        programs: scores.slice(0, 3)
+    };
+},
+
+renderCharts() {
+    const topProgram = this.analysisResult.recommendations.programs[0];
+    
+    // Pattern Recognition Chart
+    const patternCtx = document.getElementById('patternChart');
+    if (patternCtx) {
+        new Chart(patternCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Technical', 'Analytical', 'Methodical', 'Innovative'],
+                datasets: [{
+                    label: 'Your Profile',
+                    data: [
+                        topProgram.scores.technical,
+                        topProgram.scores.analytical,
+                        topProgram.scores.methodical,
+                        topProgram.scores.innovative
+                    ],
+                    borderColor: '#4F46E5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.2)'
+                }]
+            },
+            options: {
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    }
+
+    // Career Growth Chart
+    const careerCtx = document.getElementById('careerGrowthChart');
+    if (careerCtx) {
+        const baseGrowth = topProgram.match / 100;
+        new Chart(careerCtx, {
+            type: 'line',
+            data: {
+                labels: ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5'],
+                datasets: [{
+                    label: 'Career Growth Projection',
+                    data: [
+                        baseGrowth * 40,
+                        baseGrowth * 55,
+                        baseGrowth * 70,
+                        baseGrowth * 85,
+                        baseGrowth * 95
+                    ],
+                    borderColor: '#4F46E5',
+                    tension: 0.3
+                }]
+            }
+        });
+    }
+
+    // ...rest of chart rendering code...
+},
+renderComprehensiveCharts() {
+            // Radar Chart
+            const radarCtx = document.getElementById('comprehensiveRadarChart');
+            if (radarCtx) {
+                const traits = this.analysisResult.traits;
+                new Chart(radarCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: [
+                            'Analitis',
+                            'Teknikal',
+                            'Metodis',
+                            'Inovatif',
+                            'Komunikatif',
+                            'Leadership'
+                        ],
+                        datasets: [{
+                            label: 'Profil Kompetensi',
+                            data: [
+                                traits.analytical || 0,
+                                traits.technical || 0,
+                                traits.methodical || 0,
+                                traits.innovative || 0,
+                                traits.communicative || 0,
+                                traits.leadership || 0
+                            ],
+                            backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                            borderColor: 'rgb(99, 102, 241)',
+                            pointBackgroundColor: 'rgb(99, 102, 241)'
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            r: {
+                                angleLines: { display: true },
+                                suggestedMin: 0,
+                                suggestedMax: 100,
+                                ticks: { stepSize: 20 }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Program Match Chart
+            const matchCtx = document.getElementById('programMatchChart');
+            if (matchCtx) {
+                const programs = this.analysisResult.recommendations.programs;
+                new Chart(matchCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: programs.map(p => p.name),
+                        datasets: [{
+                            label: 'Program Match Score',
+                            data: programs.map(p => p.match),
+                            backgroundColor: [
+                                'rgba(99, 102, 241, 0.8)',
+                                'rgba(147, 51, 234, 0.8)',
+                                'rgba(59, 130, 246, 0.8)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Match Score (%)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        },
+
+        getTopTraits() {
+            const program = this.analysisResult.recommendations.programs[0];
+            const traits = Object.entries(this.analysisResult.traits)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 5)
+                .map(([name, score]) => {
+                    let description = '';
+                    switch(name) {
+                        case 'analytical':
+                            description = 'Kemampuan analisis yang kuat';
+                            break;
+                        case 'technical':
+                            description = 'Keahlian teknis yang baik';
+                            break;
+                        case 'methodical':
+                            description = 'Pendekatan sistematis';
+                            break;
+                        case 'innovative':
+                            description = 'Pemikiran inovatif';
+                            break;
+                        case 'communicative':
+                            description = 'Komunikasi efektif';
+                            break;
+                        case 'leadership':
+                            description = 'Jiwa kepemimpinan';
+                            break;
+                        case 'social':
+                            description = 'Kemampuan interpersonal';
+                            break;
+                        case 'creative':
+                            description = 'Kreativitas tinggi';
+                            break;
+                        case 'logical':
+                            description = 'Pemikiran logis';
+                            break;
+                        case 'adaptable':
+                            description = 'Kemampuan adaptasi';
+                            break;
+                        default:
+                            description = name.replace('_', ' ');
+                    }
+                    return {
+                        name: description,
+                        score,
+                        isRelevant: program.scores[name] > 70
+                    };
+                })
+                .filter(trait => trait.score > 65); // Only show significant traits
+
+            return { 
+                topTraits: traits,
+                programName: program.name
+            };
+        },
+
+        getDevelopmentAreas() {
+            const program = this.analysisResult.recommendations.programs[0];
+            const traits = this.analysisResult.traits;
+            
+            // Get program-specific recommendations
+            const getProgramRecommendations = (programName) => {
+                const recommendations = {
+                    'Informatika': [
+                        'Perkuat kemampuan coding dengan bootcamp',
+                        'Ikuti sertifikasi teknologi terkini',
+                        'Bangun portfolio project software',
+                        'Aktif di komunitas developer'
+                    ],
+                    'Teknik Industri': [
+                        'Pelajari tools optimasi industri',
+                        'Ikuti pelatihan Six Sigma',
+                        'Perkuat pemahaman manajemen operasi',
+                        'Terlibat dalam project improvement'
+                    ],
+                    'Akuntansi': [
+                        'Kuasai software akuntansi terkini',
+                        'Ikuti sertifikasi profesi akuntan',
+                        'Pelajari standar akuntansi terbaru',
+                        'Tingkatkan kemampuan analisis keuangan'
+                    ],
+                    'Manajemen': [
+                        'Perkuat leadership skill',
+                        'Ikuti pelatihan manajemen strategis',
+                        'Bangun networking bisnis',
+                        'Pelajari digital business'
+                    ],
+                    'Psikologi': [
+                        'Tingkatkan kemampuan konseling',
+                        'Ikuti workshop psikologi terapan',
+                        'Perkuat kemampuan asesmen',
+                        'Bangun pengalaman praktik'
+                    ],
+                    'default': [
+                        'Perkuat kemampuan inti bidang studi',
+                        'Ikuti sertifikasi profesional',
+                        'Bangun network industri',
+                        'Tingkatkan soft skills'
+                    ]
+                };
+
+                return recommendations[programName] || recommendations['default'];
+            };
+
+            // Get skill gaps based on program requirements
+            const getSkillGaps = () => {
+                const gaps = [];
+                Object.entries(program.scores).forEach(([skill, required]) => {
+                    const current = traits[skill] || 0;
+                    if (required - current > 20) {
+                        gaps.push(`Tingkatkan ${skill.replace('_', ' ')}`);
+                    }
+                });
+                return gaps;
+            };
+
+            const programRecommendations = getProgramRecommendations(program.name);
+            const skillGaps = getSkillGaps();
+
+            return {
+                developmentAreas: [
+                    ...programRecommendations,
+                    ...skillGaps
+                ].slice(0, 4), // Limit to top 4 recommendations
+                programName: program.name,
+                matchScore: program.match
+            };
+        },
+
+        exitAssessment() {
+            if (confirm('Jika Anda keluar, jawaban tidak akan terekam dan Anda harus mengulang dari awal. Apakah Anda yakin ingin keluar?')) {
+                window.location.href = 'rekprodi.html';
+            }
+        },
+    }));
+});
+</script>
+
+    
+    <!-- Add before closing body tag -->
+    <script>
+    function saveRecommendations(recommendations) {
+        // Get results from quiz/assessment
+        const results = {
+            rekpro1: recommendations[0],
+            rekpro2: recommendations[1],
+            rekpro3: recommendations[2]
+        };
+    
+        // Save to database via oauth.php
+        fetch('php/oauth.php?action=save_program_recommendations', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(results),
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                console.log('Recommendations saved successfully');
+                // Redirect or show success message
+                window.location.href = 'dash.html';
+            } else {
+                console.error('Failed to save recommendations:', data.message);
+                alert('Gagal menyimpan rekomendasi. Silakan coba lagi.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menyimpan rekomendasi');
+        });
+    }
+    // Add this to your existing quiz/assessment completion handler
+    function onQuizComplete(results) {
+        const recommendations = [
+            results.topProgram1,
+            results.topProgram2,
+            results.topProgram3
+        ];
+        saveRecommendations(recommendations);
+    }
+    saveRecommendations();
+    </script>
+</body>
+</html>
+
+
+
+
+

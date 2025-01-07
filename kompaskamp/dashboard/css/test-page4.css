@@ -1,0 +1,471 @@
+:root {
+    --primary-gradient: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+    --glass-bg: rgba(255, 255, 255, 0.9);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    background: #f3f4f6;
+    background-image: radial-gradient(circle at top right, rgba(79, 70, 229, 0.1), transparent),
+                    radial-gradient(circle at bottom left, rgba(124, 58, 237, 0.1), transparent);
+    font-family: 'Poppins', sans-serif;
+}
+
+.question-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: var(--glass-shadow);
+}
+
+.timer-card {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+.answer-option {
+    transition: all 0.3s ease;
+}
+
+.answer-option:hover {
+    background: rgba(79, 70, 229, 0.1);
+}
+
+.answer-option.selected {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+.progress-bar {
+    height: 4px;
+    background: #E2E8F0;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary-gradient);
+    transition: width 0.3s ease;
+}
+
+.question-section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding-top: 1rem; /* Add padding to question section */
+}
+
+.question-image {
+    max-width: 100%;
+    border-radius: 12px;
+    margin: 1rem 0;
+}
+
+.answer-option {
+    position: relative;
+    padding: 1.25rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.answer-option::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: transparent;
+    border-radius: 4px 0 0 4px;
+    transition: background 0.3s ease;
+}
+
+.answer-option:hover::before {
+    background: var(--primary-gradient);
+}
+
+.answer-option.selected::before {
+    background: var(--primary-gradient);
+}
+
+.result-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.score-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-gradient);
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0 auto;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-slide-in {
+    animation: slideIn 0.5s ease forwards;
+}
+
+/* Updated header style */
+.test-header {
+    background: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    height: 80px; /* Fixed height for header */
+}
+
+/* Updated question navigation styles */
+.question-nav {
+    background: white;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.question-number {
+    width: 40px;
+    height: 40px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.question-number.answered {
+    background: var(--primary-gradient);
+}
+
+.question-number.marked {
+    background: #FCD34D;
+}
+
+.question-number.current {
+    box-shadow: 0 0 0 2px #4F46E5;
+}
+
+.question-numbers-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    gap: 8px;
+    padding: 16px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Add these new styles */
+.flag-review-button {
+    position: fixed;
+    right: 24px;
+    bottom: 100px; /* Above the question navigation */
+    padding: 12px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 2px solid #FCD34D;
+    z-index: 40;
+    transition: all 0.3s ease;
+}
+
+.flag-review-button:hover {
+    transform: scale(1.05);
+    background: #FCD34D;
+    color: white;
+}
+
+.flag-review-button.active {
+    background: #FCD34D;
+    color: white;
+}
+
+.question-number {
+    width: 45px;
+    height: 45px;
+    margin: 4px;
+    font-weight: 600;
+}
+
+.question-numbers-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 45px);
+    gap: 8px;
+    justify-content: center;
+    padding: 16px;
+    background: white;
+    border-radius: 12px;
+    margin: 0 auto;
+    max-width: fit-content;
+}
+
+.status-indicator {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.status-indicator.review {
+    background: #FCD34D;
+}
+
+/* New styles for side navigation */
+.side-navigation {
+    position: fixed;
+    right: 0;
+    top: 80px; /* Below header */
+    bottom: 0;
+    width: 280px;
+    background: white;
+    border-left: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    z-index: 30;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.05);
+    overflow-y: auto;
+}
+
+.question-numbers-panel {
+    padding: 1.5rem;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.action-panel {
+    padding: 1.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    background: white;
+}
+
+.number-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.number-button {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-weight: 600;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.number-button.answered {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+.number-button.current {
+    border: 2px solid #4F46E5;
+    color: #4F46E5;
+}
+
+.number-button.flagged::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background: #FCD34D;
+    border-radius: 50%;
+}
+
+.main-content-adjusted {
+    margin-right: 280px; /* Same as side-navigation width */
+    padding: 2rem;
+    padding-top: 6rem; /* Increase top padding to prevent header overlap */
+    padding-bottom: 6rem; /* Add padding for navigation buttons */
+}
+
+.action-button {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-bottom: 0.5rem;
+}
+
+.section-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6B7280;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Add new styles for navigation buttons */
+.nav-buttons {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 1rem;
+    z-index: 40;
+    background: white;
+    padding: 0.75rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.nav-button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Update navigation and layout styles */
+.main-content-adjusted {
+    margin-right: 280px;
+    padding: 2rem;
+    padding-top: 6rem;
+    padding-bottom: 2rem; /* Reduce bottom padding */
+    min-height: calc(100vh - 80px); /* Full height minus header */
+    display: flex;
+    flex-direction: column;
+}
+
+.question-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-bottom: 5rem; /* Space for navigation */
+}
+
+.navigation-container {
+    position: fixed;
+    left: 0;
+    right: 280px; /* Account for side navigation */
+    bottom: 0;
+    background: white;
+    padding: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 40;
+}
+
+.nav-button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 140px;
+    justify-content: center;
+}
+
+.nav-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Update side navigation to account for bottom navigation */
+.side-navigation {
+    bottom: 0;
+    z-index: 41; /* Above bottom navigation */
+}
+
+/* Add new styles for results section */
+.result-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background-color: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.stat-card {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #f3f4f6;
+}
+
+.detail-table {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.detail-table th {
+    padding: 0.5rem 1rem;
+    background-color: #f9fafb;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #4b5563;
+}
+
+.detail-table td {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.progress-ring {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 1rem;
+}
+
+.analysis-card {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.analysis-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+[x-cloak] { display: none !important; }

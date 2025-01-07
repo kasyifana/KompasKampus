@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback - Kompas Kampus</title>
+    
+    <!-- Dependencies -->
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/feedback.css">
+
+    <!-- Copy the exact same styles from dash.html -->
+    <style>
+        
+    </style>
+</head>
+<body x-data="{ sidebarOpen: false }">
+    <!-- Updated Header -->
+    <header class="fixed w-full bg-white shadow-lg z-50">
+        <div class="flex justify-between items-center px-6 py-3">
+            <div class="flex items-center space-x-4">
+                <button @click="sidebarOpen = !sidebarOpen" 
+                        class="p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
+                    <div class="w-6 h-5 flex flex-col justify-between">
+                        <span class="w-full h-0.5 bg-gray-600 rounded-full transition-all duration-200"
+                              :class="{'rotate-45 translate-y-2': sidebarOpen}"></span>
+                        <span class="w-full h-0.5 bg-gray-600 rounded-full transition-all duration-200"
+                              :class="{'opacity-0': sidebarOpen}"></span>
+                        <span class="w-full h-0.5 bg-gray-600 rounded-full transition-all duration-200"
+                              :class="{'-rotate-45 -translate-y-2': sidebarOpen}"></span>
+                    </div>
+                </button>
+                <div class="flex items-center">
+                    <img src="logohet.jpg" alt="Logo" class="h-12 w-auto">
+                    <span class="ml-3 text-xl font-bold">
+                        <span class="text-blue-600">Kompas</span>
+                        <span style="color: #ffff00">Kampus</span>
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center space-x-6">
+                <a href="/kompaskamp/dashboard/home.html" class="text-gray-700 hover:text-blue-600">Home</a>
+                <a href="/kompaskamp/about/about.html" class="text-gray-700 hover:text-blue-600">About Us</a>
+                <a href="/kompaskamp/news/news.html" class="text-gray-700 hover:text-blue-600">News</a>
+            </nav>
+
+            <!-- User Menu -->
+            <!-- User Menu -->
+            <div class="flex items-center space-x-4">
+                <div class="relative" x-data="{ isOpen: false }">
+                    <button @click="isOpen = !isOpen" 
+                            class="flex items-center space-x-3 bg-white p-2 rounded-lg hover:bg-gray-50">
+                        <img src="student1.jpg" alt="Profile" class="w-10 h-10 rounded-full border-2 border-blue-500">
+                        <div class="hidden md:block text-left">
+                            <p id="user-fullname" class="font-semibold text-gray-800"></p>
+                            <p class="text-sm text-gray-500">Student</p>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-400"></i>
+                    </button>
+                    <!-- Changed dropdown implementation -->
+                    <div x-show="isOpen" 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         @click.away="isOpen = false"
+                         class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                        <div class="px-4 py-3 border-b border-gray-100">
+                            <p id="dropdown-fullname" class="font-semibold text-gray-800"></p>
+                            <p id="dropdown-email" class="text-sm text-gray-500"></p>
+                        </div>
+                        <a href="profile.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50">
+                            <i class="fas fa-user-circle text-gray-600"></i>
+                            <span>My Profile</span>
+                        </a>
+                        
+                        <a href="../dashboard/php/logout.php" class="flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar - Updated with overlay -->
+    <div class="relative z-40 md:hidden" 
+         x-show="sidebarOpen" 
+         @click.away="sidebarOpen = false">
+        <!-- Overlay -->
+        <div class="fixed inset-0 bg-gray-600 bg-opacity-75" 
+             x-show="sidebarOpen"
+             x-transition:enter="transition-opacity ease-linear duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition-opacity ease-linear duration-300"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"></div>
+
+        <!-- Sidebar -->
+        <aside class="fixed inset-y-0 left-0 max-w-xs w-full bg-white shadow-lg transform transition duration-300 ease-in-out"
+               :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}">
+            <!-- Existing sidebar content -->
+            <nav class="p-4 space-y-2 mt-20">
+                <a href="dash.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="latsol.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-book"></i>
+                    <span>Latihan Soal</span>
+                </a>
+                
+                <a href="rekprodi.html" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Rekomendasi Prodi</span>
+                    </div>
+                </a>
+                
+                <a href="/kompaskamp/expstud/explore.html" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-university"></i>
+                        <span>Info Prodi</span>
+                    </div>
+                    <span class="bg-purple-100 text-purple-600 text-xs px-2 py-1 rounded-full">New</span>
+                </a>
+                
+                <a href="infobeasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Info Beasiswa</span>
+                </a>
+
+                <a href="feedback.html" class="flex items-center space-x-3 p-3 rounded-xl transition-all duration-300"
+                   :class="{'bg-gradient-to-r from-indigo-600 to-purple-600 text-white': true}">
+                    <i class="fas fa-comment"></i>
+                    <span>Feedback</span>
+                </a>
+            </nav>
+        </aside>
+    </div>
+
+    <!-- Desktop Sidebar -->
+    <aside class="hidden md:block fixed left-0 top-0 h-full shadow-lg pt-20 bg-white" 
+           :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}">
+        <!-- Existing sidebar content -->
+        <nav class="p-4 space-y-2">
+            <a href="dash.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            
+            <a href="latsol.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-book"></i>
+                <span>Latihan Soal</span>
+            </a>
+            
+            <a href="rekprodi.html" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Rekomendasi Prodi</span>
+                </div>
+            </a>
+            
+            <a href="/kompaskamp/expstud/explore.html" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-university"></i>
+                    <span>Info Prodi</span>
+                </div>
+                <span class="bg-purple-100 text-purple-600 text-xs px-2 py-1 rounded-full">New</span>
+            </a>
+            
+            <a href="infobeasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Info Beasiswa</span>
+            </a>
+
+            <a href="feedback.html" class="flex items-center space-x-3 p-3 rounded-xl transition-all duration-300"
+               :class="{'bg-gradient-to-r from-indigo-600 to-purple-600 text-white': true}">
+                <i class="fas fa-comment"></i>
+                <span>Feedback</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Updated Main Content -->
+    <main class="main-content">
+        <div class="feedback-container">
+            <!-- Updated Hero Section with matching dashboard style -->
+            <div class="card-dashboard p-8 mb-8 rounded-2xl animate-fade-in">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+                            Pusat Feedback
+                        </h1>
+                        <p class="text-gray-600 mt-2">Bagikan ide Anda, tingkatkan pengalaman bersama!</p>
+                    </div>
+                    <div class="hidden md:block">
+                        <i class="fas fa-lightbulb text-6xl text-indigo-600"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search and Filter Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-8">
+                <!-- Left Sidebar -->
+                <div class="lg:col-span-1 space-y-6">
+                    <!-- Categories -->
+                    <div class="bg-white rounded-xl p-4 shadow-sm">
+                        <h3 class="font-medium text-gray-800 mb-4">Kategori</h3>
+                        <div class="space-y-3">
+                            <!-- All Categories -->
+
+
+                            <!-- UI/UX Design -->
+                            <div @click="filterByCategory('ui')" 
+                                 class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-indigo-50 transition-all cursor-pointer"
+                                 :class="{'bg-indigo-50 text-indigo-600': selectedCategory === 'ui'}">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-palette text-purple-500"></i>
+                                    <span>UI/UX Design</span>
+                                </div>
+                                <span class="bg-purple-100 text-purple-600 px-2 py-1 rounded-full text-xs"
+                                      x-text="feedbacks.filter(f => f.category === 'ui').length"></span>
+                            </div>
+
+                            <!-- Performance -->
+                            <div @click="filterByCategory('performance')" 
+                                 class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-indigo-50 transition-all cursor-pointer"
+                                 :class="{'bg-indigo-50 text-indigo-600': selectedCategory === 'performance'}">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-tachometer-alt text-blue-500"></i>
+                                    <span>Performa Aplikasi</span>
+                                </div>
+                                <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-xs"
+                                      x-text="feedbacks.filter(f => f.category === 'performance').length"></span>
+                            </div>
+
+                            <!-- Accuracy -->
+                            <div @click="filterByCategory('accuracy')" 
+                                 class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-indigo-50 transition-all cursor-pointer"
+                                 :class="{'bg-indigo-50 text-indigo-600': selectedCategory === 'accuracy'}">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-chart-line text-green-500"></i>
+                                    <span>Keakuratan Prediksi</span>
+                                </div>
+                                <span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs"
+                                      x-text="feedbacks.filter(f => f.category === 'accuracy').length"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="lg:col-span-3" x-data="{ 
+                    feedbacks: [],
+                    searchQuery: '',
+                    currentPage: 1,
+                    itemsPerPage: 4,
+                    selectedCategory: 'all',
+                    
+                    async init() {
+                        try {
+                            const response = await fetch('../dashboard/php/get_feedbacks.php');
+                            const data = await response.json();
+                            if (data.success) {
+                                this.feedbacks = data.feedbacks;
+                            }
+                        } catch (error) {
+                            console.error('Error fetching feedbacks:', error);
+                        }
+                    },
+
+                    async submitFeedback(data) {
+                        try {
+                            const response = await fetch('../dashboard/php/submit_feedback.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(data)
+                            });
+                            
+                            const result = await response.json();
+                            if (result.success) {
+                                // Add new feedback to the beginning of the list
+                                this.feedbacks.unshift(result.feedback);
+                                // Close modal
+                                $store.modal.toggle();
+                                // Reset form
+                                this.selectedCategory = null;
+                                this.subject = '';
+                                this.detail = '';
+                            } else {
+                                alert('Error: ' + result.error);
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            alert('Failed to submit feedback');
+                        }
+                    },
+                    
+                    // Toggle bookmark function
+                    toggleBookmark(feedback) {
+                        feedback.isBookmarked = !feedback.isBookmarked;
+                        if (feedback.isBookmarked) {
+                            this.savedFeedbacks.push({...feedback});
+                        } else {
+                            this.savedFeedbacks = this.savedFeedbacks.filter(f => f.id !== feedback.id);
+                            const originalFeedback = this.feedbacks.find(f => f.id === feedback.id);
+                            if (originalFeedback) {
+                                originalFeedback.isBookmarked = false;
+                            }
+                        }
+                        localStorage.setItem('savedFeedbacks', JSON.stringify(this.savedFeedbacks));
+                    },
+                    
+                    // Add pagination methods
+                    get filteredFeedbacks() {
+                        return this.feedbacks.filter(feedback => {
+                            const searchLower = this.searchQuery.toLowerCase();
+                            const matchesSearch = searchLower === '' || 
+                                feedback.title.toLowerCase().includes(searchLower) ||
+                                feedback.author.toLowerCase().includes(searchLower) ||
+                                feedback.content.toLowerCase().includes(searchLower) ||
+                                (feedback.category === this.selectedCategory && this.selectedCategory !== 'all');
+
+                            const matchesCategory = 
+                                this.selectedCategory === 'all' || 
+                                feedback.category === this.selectedCategory;
+
+                            return matchesSearch && matchesCategory;
+                        });
+                    },
+                    
+                    get paginatedFeedbacks() {
+                        const start = (this.currentPage - 1) * this.itemsPerPage;
+                        const end = start + this.itemsPerPage;
+                        return this.filteredFeedbacks.slice(start, end);
+                    },
+                    
+                    get totalPages() {
+                        return Math.ceil(this.filteredFeedbacks.length / this.itemsPerPage);
+                    },
+                    
+                    changePage(page) {
+                        if (page >= 1 && page <= this.totalPages) {
+                            this.currentPage = page;
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                    },
+                    
+                    get pageNumbers() {
+                        const pages = [];
+                        for (let i = 1; i <= this.totalPages; i++) {
+                            pages.push(i);
+                        }
+                        return pages;
+                    },
+                    
+                    updateSearch(query) {
+                        this.searchQuery = query;
+                        this.currentPage = 1;
+                        console.log('Search query:', query, 'Category:', this.selectedCategory);
+                    },
+                    // Add method to filter by category
+                    filterByCategory(category) {
+                        console.log('Filtering by category:', category); // Debug log
+                        this.selectedCategory = category;
+                        this.currentPage = 1; // Reset to first page when changing category
+                        console.log('Category filter:', category, 'Search query:', this.searchQuery);
+                    }
+                }" x-init="init()">
+                    <!-- Search Bar -->
+                    <div class="bg-white rounded-xl p-4 shadow-sm mb-6">
+                        <div class="space-y-4">
+                            <div class="relative flex items-center">
+                                <i class="fas fa-search text-gray-400 absolute left-3"></i>
+                                <input type="text" 
+                                       x-model="searchQuery"
+                                       @input="updateSearch($event.target.value)"
+                                       placeholder="Cari feedback..." 
+                                       class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                            </div>
+                            <!-- Add search filters -->
+                            <div class="flex flex-wrap gap-2">
+                                <button @click="filterByCategory('all')"
+                                        class="px-3 py-1 rounded-full text-sm transition-colors"
+                                        :class="selectedCategory === 'all' ? 'bg-gray-200 text-gray-800' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+                                    Semua
+                                </button>
+                                <button @click="filterByCategory('ui')"
+                                        class="px-3 py-1 rounded-full text-sm transition-colors"
+                                        :class="selectedCategory === 'ui' ? 'bg-purple-200 text-purple-800' : 'bg-purple-50 text-purple-600 hover:bg-purple-100'">
+                                    UI/UX Design
+                                </button>
+                                <button @click="filterByCategory('performance')"
+                                        class="px-3 py-1 rounded-full text-sm transition-colors"
+                                        :class="selectedCategory === 'performance' ? 'bg-blue-200 text-blue-800' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'">
+                                    Performa Aplikasi
+                                </button>
+                                <button @click="filterByCategory('accuracy')"
+                                        class="px-3 py-1 rounded-full text-sm transition-colors"
+                                        :class="selectedCategory === 'accuracy' ? 'bg-green-200 text-green-800' : 'bg-green-50 text-green-600 hover:bg-green-100'">
+                                    Keakuratan Prediksi
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feedback List -->
+                    <div class="space-y-4">
+                        <!-- Update the Feedback Baru button - removed Lihat Tersimpan -->
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-semibold text-gray-800">Terbaru</h2>
+                            <button @click="$store.modal.toggle()" 
+                                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>Feedback Baru
+                            </button>
+                        </div>
+
+                        <!-- Feedback Cards - removed bookmark functionality -->
+                        <template x-for="feedback in paginatedFeedbacks" :key="feedback.id">
+                            <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-center space-x-4">
+                                        <!-- Ganti img dengan div berisi ikon random -->
+                                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xl"
+                                             :class="{
+                                                 'bg-purple-500': feedback.id % 10 === 0,
+                                                 'bg-blue-500': feedback.id % 10 === 1,
+                                                 'bg-green-500': feedback.id % 10 === 2,
+                                                 'bg-red-500': feedback.id % 10 === 3,
+                                                 'bg-yellow-500': feedback.id % 10 === 4,
+                                                 'bg-indigo-500': feedback.id % 10 === 5,
+                                                 'bg-pink-500': feedback.id % 10 === 6,
+                                                 'bg-teal-500': feedback.id % 10 === 7,
+                                                 'bg-orange-500': feedback.id % 10 === 8,
+                                                 'bg-cyan-500': feedback.id % 10 === 9
+                                             }">
+                                            <i class="fas" 
+                                               :class="{
+                                                   'fa-user': feedback.id % 10 === 0,
+                                                   'fa-user-graduate': feedback.id % 10 === 1,
+                                                   'fa-user-tie': feedback.id % 10 === 2,
+                                                   'fa-user-astronaut': feedback.id % 10 === 3,
+                                                   'fa-user-ninja': feedback.id % 10 === 4,
+                                                   'fa-user-secret': feedback.id % 10 === 5,
+                                                   'fa-user-shield': feedback.id % 10 === 6,
+                                                   'fa-user-doctor': feedback.id % 10 === 7,
+                                                   'fa-user-gear': feedback.id % 10 === 8,
+                                                   'fa-user-pen': feedback.id % 10 === 9
+                                               }">
+                                            </i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-medium text-gray-800" x-text="feedback.title"></h3>
+                                            <p class="text-sm text-gray-500">
+                                                <span x-text="feedback.author"></span>
+                                                <span class="mx-2">•</span>
+                                                <span x-text="feedback.time"></span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-gray-600" x-text="feedback.content"></p>
+                                
+                                <!-- Category badge -->
+                                <div class="flex items-center justify-end mt-4">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm"
+                                          :class="{
+                                              'bg-purple-100 text-purple-600': feedback.category === 'ui',
+                                              'bg-blue-100 text-blue-600': feedback.category === 'performance',
+                                              'bg-green-100 text-green-600': feedback.category === 'accuracy'
+                                          }">
+                                        <i class="fas mr-2"
+                                           :class="{
+                                               'fa-palette': feedback.category === 'ui',
+                                               'fa-tachometer-alt': feedback.category === 'performance',
+                                               'fa-chart-line': feedback.category === 'accuracy'
+                                           }">
+                                        </i>
+                                        <span x-text="feedback.category === 'ui' ? 'UI/UX Design' : 
+                                                     feedback.category === 'performance' ? 'Performa Aplikasi' : 
+                                                     'Keakuratan Prediksi'">
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Add pagination controls -->
+                        <div class="flex justify-center space-x-2 mt-8">
+                            <button @click="changePage(currentPage - 1)"
+                                    :disabled="currentPage === 1"
+                                    class="px-4 py-2 rounded-lg transition-colors"
+                                    :class="currentPage === 1 ? 'text-gray-400 bg-gray-100' : 'text-gray-600 hover:bg-gray-100'">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            
+                            <template x-for="pageNum in pageNumbers" :key="pageNum">
+                                <button @click="changePage(pageNum)"
+                                        class="px-4 py-2 rounded-lg transition-colors"
+                                        :class="currentPage === pageNum ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'"
+                                        x-text="pageNum">
+                                </button>
+                            </template>
+                            
+                            <button @click="changePage(currentPage + 1)"
+                                    :disabled="currentPage === totalPages"
+                                    class="px-4 py-2 rounded-lg transition-colors"
+                                    :class="currentPage === totalPages ? 'text-gray-400 bg-gray-100' : 'text-gray-600 hover:bg-gray-100'">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100');
+                    entry.target.classList.remove('opacity-0');
+                }
+            });
+        });
+
+        document.querySelectorAll('.card-dashboard').forEach((el) => {
+            el.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+            observer.observe(el);
+        });
+
+        // Add this to your existing script section
+        function submitFeedback(data) {
+            fetch('../dashboard/php/submit_feedback.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    // Add feedback to UI
+                    addFeedbackToUI(data);
+                    // Close modal
+                    Alpine.store('modal').toggle();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to submit feedback');
+            });
+        }
+    </script>
+
+    <!-- Feedback Form Modal -->
+    <div x-data 
+         x-show="$store.modal.open"
+         class="fixed inset-0 z-50 overflow-y-auto"
+         style="display: none;">
+        
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity"
+             x-show="$store.modal.open"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click="$store.modal.toggle()">
+        </div>
+
+        <!-- Modal -->
+        <div class="fixed inset-0 z-50 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4">
+                <div x-show="$store.modal.open"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 transform scale-95"
+                     x-transition:enter-end="opacity-100 transform scale-100"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 transform scale-100"
+                     x-transition:leave-end="opacity-0 transform scale-95"
+                     @click.away="$store.modal.toggle()"
+                     class="bg-white rounded-2xl shadow-xl w-full max-w-2xl transform transition-all">
+                    
+                    <!-- Modal Header -->
+                    <div class="border-b border-gray-100 px-6 py-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xl font-semibold text-gray-800">Buat Feedback Baru</h3>
+                            <button @click="$store.modal.toggle()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Modal Body -->
+                    <div class="px-6 py-4">
+                        <form class="space-y-6" 
+                              x-data="{ 
+                                  selectedCategory: null,
+                                  subject: '',
+                                  detail: ''
+                              }"
+                              @submit.prevent="submitFeedback({
+                                  subject: subject,
+                                  detail: detail,
+                                  category: selectedCategory
+                              })">
+                            <!-- Category Selection -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    <label class="relative flex items-center justify-center p-4 border border-gray-200 rounded-xl cursor-pointer transition-all"
+                                           :class="{'border-indigo-500 bg-indigo-50': selectedCategory === 'ui'}">
+                                        <input type="radio" 
+                                               name="category" 
+                                               value="ui" 
+                                               class="absolute opacity-0"
+                                               @click="selectedCategory = 'ui'">
+                                        <div class="flex flex-col items-center">
+                                            <i class="fas fa-palette text-xl transition-colors"
+                                               :class="selectedCategory === 'ui' ? 'text-indigo-600' : 'text-purple-500'"></i>
+                                            <span class="mt-2 text-sm transition-colors"
+                                                  :class="selectedCategory === 'ui' ? 'text-indigo-600' : 'text-gray-600'">UI/UX Design</span>
+                                        </div>
+                                    </label>
+
+                                    <label class="relative flex items-center justify-center p-4 border border-gray-200 rounded-xl cursor-pointer transition-all"
+                                           :class="{'border-indigo-500 bg-indigo-50': selectedCategory === 'performance'}">
+                                        <input type="radio" 
+                                               name="category" 
+                                               value="performance" 
+                                               class="absolute opacity-0"
+                                               @click="selectedCategory = 'performance'">
+                                        <div class="flex flex-col items-center">
+                                            <i class="fas fa-tachometer-alt text-xl transition-colors"
+                                               :class="selectedCategory === 'performance' ? 'text-indigo-600' : 'text-blue-500'"></i>
+                                            <span class="mt-2 text-sm transition-colors"
+                                                  :class="selectedCategory === 'performance' ? 'text-indigo-600' : 'text-gray-600'">Performa Aplikasi</span>
+                                        </div>
+                                    </label>
+
+                                    <label class="relative flex items-center justify-center p-4 border border-gray-200 rounded-xl cursor-pointer transition-all"
+                                           :class="{'border-indigo-500 bg-indigo-50': selectedCategory === 'accuracy'}">
+                                        <input type="radio" 
+                                               name="category" 
+                                               value="accuracy" 
+                                               class="absolute opacity-0"
+                                               @click="selectedCategory = 'accuracy'">
+                                        <div class="flex flex-col items-center">
+                                            <i class="fas fa-chart-line text-xl transition-colors"
+                                               :class="selectedCategory === 'accuracy' ? 'text-indigo-600' : 'text-green-500'"></i>
+                                            <span class="mt-2 text-sm transition-colors"
+                                                  :class="selectedCategory === 'accuracy' ? 'text-indigo-600' : 'text-gray-600'">Keakuratan Prediksi</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Subject Input -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Subjek</label>
+                                <input type="text" 
+                                       x-model="subject"
+                                       class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                       placeholder="Judul feedback Anda...">
+                            </div>
+
+                            <!-- Detail Textarea -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Detail Feedback</label>
+                                <textarea rows="4" 
+                                          x-model="detail"
+                                          class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                          placeholder="Jelaskan detail feedback Anda secara lengkap..."></textarea>
+                            </div>
+
+                            <!-- Modal Footer -->
+                            <div class="flex justify-end space-x-3 mt-6">
+                                <button type="button"
+                                        @click="$store.modal.toggle()" 
+                                        class="px-4 py-2 text-gray-600 hover:text-gray-700">
+                                    Batal
+                                </button>
+                                <button type="submit"
+                                        class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-colors">
+                                    Kirim Feedback
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add this in your Alpine.js initialization -->
+    <script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.store('modal', {
+            open: false,
+            toggle() {
+                this.open = !this.open;
+            }
+        });
+    });
+    </script>
+
+    <!-- Add this function to handle form submission -->
+    <script>
+    async function submitFeedback(data) {
+        try {
+            const response = await fetch('../dashboard/php/submit_feedback.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                // Refresh feedbacks list
+                window.location.reload();
+                // Close modal
+                Alpine.store('modal').toggle();
+            } else {
+                alert('Error: ' + result.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Gagal mengirim feedback: ' + error.message);
+        }
+    }
+     // Function to load user data
+     function loadUserData() {
+            const fullname = sessionStorage.getItem('fullname');
+            const email = sessionStorage.getItem('email');
+            
+            // Update the user fullname in header
+            const userFullnameElement = document.getElementById('user-fullname');
+            if (userFullnameElement && fullname) {
+                userFullnameElement.textContent = fullname;
+            }
+            
+            // Update the dropdown elements
+            const dropdownFullnameElement = document.getElementById('dropdown-fullname');
+            const dropdownEmailElement = document.getElementById('dropdown-email');
+            
+            if (dropdownFullnameElement && fullname) {
+                dropdownFullnameElement.textContent = fullname;
+            }
+            if (dropdownEmailElement && email) {
+                dropdownEmailElement.textContent = email;
+            }
+        }
+
+        // Call the function when page loads
+        document.addEventListener('DOMContentLoaded', loadUserData);
+    </script>
+
+</body>
+</html>
