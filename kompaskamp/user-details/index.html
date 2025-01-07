@@ -1,0 +1,68 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Profile - Kompas Kampus</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
+            <div class="text-center mb-8">
+                <img src="../homebeforelogin/logohet.jpg" alt="Logo" class="h-12 mx-auto mb-4">
+                <h2 class="text-2xl font-bold">Complete Your Profile</h2>
+                <p class="text-gray-600">Please provide your additional details</p>
+            </div>
+
+            <form id="userDetailsForm" class="space-y-6">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">First Name</label>
+                    <input type="text" id="firstName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Last Name</label>
+                    <input type="text" id="lastName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition duration-300">
+                    Continue to Dashboard
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in with Google
+            const userData = localStorage.getItem('googleUserData');
+            if (!userData) {
+                window.location.href = '../homebeforelogin/index.html';
+                return;
+            }
+
+            // Handle form submission
+            document.getElementById('userDetailsForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const firstName = document.getElementById('firstName').value;
+                const lastName = document.getElementById('lastName').value;
+                const googleData = JSON.parse(userData);
+
+                // Combine Google data with user details
+                const completeUserData = {
+                    ...googleData,
+                    firstName: firstName,
+                    lastName: lastName
+                };
+
+                // Store complete user data
+                localStorage.setItem('completeUserData', JSON.stringify(completeUserData));
+
+                // Redirect to dashboard
+                window.location.href = '../dashboard/index.html';
+            });
+        });
+    </script>
+</body>
+</html>
